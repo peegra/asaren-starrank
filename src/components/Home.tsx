@@ -266,25 +266,22 @@ const Home: React.FC = () => {
           </button>
         </div>
         <div className="list-card flex-1">
-          <ul className="flex flex-col gap-3 list-none m-0 p-0">
+          <ul className="grid grid-cols-9 gap-2 list-none m-0 p-0">
             {players.map((player) => (
               <li key={player.playerCode}>
-                <div className="list-item">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <img src={player.photoUrl || noImageSrc} alt={player.playerName} className="w-12 h-12 md:w-14 md:h-14 rounded-[var(--radius-md)] object-cover border border-[rgba(20,241,255,0.3)] flex-shrink-0" onError={(e) => { e.currentTarget.src = noImageSrc; }} />
-                    <div className="min-w-0">
-                      <div className="font-semibold text-[var(--color-text)] truncate">{player.playerName}</div>
-                      <div className="text-sm text-[var(--color-muted)]">{player.grade}</div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedPlayer(player)}
+                  className={`chip-button w-full ${selectedPlayer?.playerCode === player.playerCode ? 'is-selected' : ''}`}
+                >
+                  <div className="flex flex-col items-center gap-1 overflow-hidden">
+                    <div className="font-semibold text-[var(--color-text)] text-xs truncate w-full text-center">{player.playerName}</div>
+                    <div className="text-xs text-[var(--color-muted)] truncate w-full text-center">{player.grade}</div>
+                    <div className="w-6 h-6 flex-shrink-0">
+                      <img src={player.photoUrl || noImageSrc} alt={player.playerName} className="w-full h-full rounded object-cover border border-[rgba(20,241,255,0.3)] max-w-full max-h-full" onError={(e) => { e.currentTarget.src = noImageSrc; }} />
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedPlayer(player)}
-                    className="primary-button flex-shrink-0"
-                  >
-                    選択
-                  </button>
-                </div>
+                </button>
               </li>
             ))}
           </ul>
