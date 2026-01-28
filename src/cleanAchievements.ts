@@ -1,17 +1,25 @@
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { db } from "./firebase";
 
+interface Achievement {
+  id: string;
+  playerCode: string;
+  missionCode: string;
+  starType: string;
+  achievedAt: any;
+}
+
 async function cleanAchievements() {
   const achievementsRef = collection(db, "achievements");
   const snapshot = await getDocs(achievementsRef);
-  const achievements = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  const achievements = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Achievement[];
 
   const grouped = achievements.reduce((acc, ach) => {
     const key = `${ach.playerCode}-${ach.missionCode}`;
     if (!acc[key]) acc[key] = [];
     acc[key].push(ach);
     return acc;
-  }, {} as Record<string, any[]>);
+  }, {} as Record<string, Achievement[]>);
 
   for (const key in grouped) {
     const group = grouped[key];
