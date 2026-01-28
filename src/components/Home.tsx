@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { collection, getDocs, addDoc, deleteDoc, doc } from "firebase/firestore";
 import { db } from '../firebase';
+import noImageSrc from '../assets/noimage.png';
 
 interface Player {
   playerCode: string;
@@ -159,74 +160,98 @@ const Home: React.FC = () => {
       <h1 className="card-title animate-bounce-in">選手状況確認</h1>
 
       {selectedPlayer && (
-        <div className="card animate-bounce-in flex flex-col items-center text-center">
-          <div className="w-24 h-24 md:w-28 md:h-28 mx-auto mb-3">
-            <img
-              src={selectedPlayer.photoUrl}
-              alt={selectedPlayer.playerName}
-              className="w-full h-full rounded-full object-cover border-2 border-[rgba(20,241,255,0.4)] shadow-card"
-              onError={(e) => {
-                e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDMTMuMSAyIDE0IDIuOSAxNCA0QzE0IDUuMSAxMy4xIDYgMTIgNkMxMC45IDYgMTAgNS4xIDEwIDRDMTAgMi45IDEwLjkgMiAxMiAyWk0yMSAxOVYyMEgzVjE5QzMgMTYuMzMgNS4zMyAxNCA4IDE0SDE2QzE4LjY3IDE0IDIxIDE2LjMzIDIxIDE5WiIgZmlsbD0iIzk5OSI+PC9wYXRoPgo8L3N2Zz4=';
-              }}
-            />
+        <div className="card animate-bounce-in max-w-4xl mx-auto">
+          {/* iPad縦向き最適化グリッドレイアウト */}
+          <div className="grid grid-cols-3 gap-6">
+            {/* 上部：名前（左1/3）と年齢コメント（右2/3） */}
+            <div className="col-span-1 flex flex-col items-center justify-start">
+              <h2 className="text-2xl md:text-3xl font-bold text-[var(--color-text)] text-center">{selectedPlayer.playerName}</h2>
+            </div>
+            <div className="col-span-2 flex flex-col items-start justify-center">
+              <p className="text-[var(--color-accent)] font-medium text-lg">{selectedPlayer.grade}</p>
+              <p className="text-sm text-[var(--color-muted)]">{selectedPlayer.comment}</p>
+            </div>
+
+            {/* 下部：選手写真（左1/3）、星マーク（中央1/3）、星の数（右1/3） */}
+            <div className="col-span-1 flex flex-col items-center">
+              <div className="w-full aspect-square flex-shrink-0 relative">
+                <img
+                  src={selectedPlayer.photoUrl || noImageSrc}
+                  alt={selectedPlayer.playerName}
+                  className="w-full h-full rounded-lg object-cover border-4 border-[rgba(20,241,255,0.4)] shadow-card"
+                  onError={(e) => {
+                    e.currentTarget.src = noImageSrc;
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* 星マーク（中央1/3） */}
+            <div className="col-span-1 flex flex-col items-center justify-center gap-4">
+              <StarIcon variant="gold" size="6em" />
+              <StarIcon variant="silver" size="6em" />
+              <StarIcon variant="bronze" size="6em" />
+            </div>
+
+            {/* 星の数（右1/3） */}
+            <div className="col-span-1 flex flex-col items-center justify-center gap-4">
+              <div className="font-bold text-[var(--color-text)]" style={{ fontSize: '6rem' }}>{gold}</div>
+              <div className="font-bold text-[var(--color-text)]" style={{ fontSize: '6rem' }}>{silver}</div>
+              <div className="font-bold text-[var(--color-text)]" style={{ fontSize: '6rem' }}>{bronze}</div>
+            </div>
           </div>
-          <h2 className="text-xl md:text-2xl font-bold text-[var(--color-text)]">{selectedPlayer.playerName}</h2>
-          <p className="text-[var(--color-accent)] font-medium">{selectedPlayer.grade}</p>
-          <p className="text-sm text-[var(--color-muted)] mb-4">{selectedPlayer.comment}</p>
-          <div className="flex gap-4">
-            <div className="stat-pill gold">
-              <span className="value">{gold}</span>
-              <span className="label">Gold</span>
-            </div>
-            <div className="stat-pill silver">
-              <span className="value">{silver}</span>
-              <span className="label">Silver</span>
-            </div>
-            <div className="stat-pill bronze">
-              <span className="value">{bronze}</span>
-              <span className="label">Bronze</span>
-            </div>
+        </div>
+      )}
+
+      {selectedMission && selectedPlayer && (
+        <div className="card">
+          <div className="flex items-center justify-center gap-4 mb-3">
+            <h4 className="section-title mb-0 text-center">{selectedMission.missionName}</h4>
+            <p className="text-sm text-[var(--color-muted)]">{selectedMission.content}</p>
+          </div>
+          <div className="flex justify-center gap-6">
+            {[{ type: 'bronze' }, { type: 'silver' }, { type: 'gold' }].map((star) => (
+              <button
+                key={star.type}
+                type="button"
+                onClick={() => handleStarClick(star.type)}
+                className="cursor-pointer hover:opacity-90 active:scale-95 transition-all"
+              >
+                <span className={getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode) === star.type ? 'animate-star-pulse inline-block' : 'inline-block'}>
+                  <StarIcon
+                    variant={getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode) === star.type ? star.type as StarVariant : 'disabled'}
+                    size="3em"
+                  />
+                </span>
+              </button>
+            ))}
           </div>
         </div>
       )}
 
       <div className="card">
         <h3 className="section-title mb-4">⭐ MISSIONS</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
-          {missions.map((mission) => (
-            <button
-              key={mission.missionCode}
-              type="button"
-              onClick={() => setSelectedMission(mission)}
-              className={`chip-button ${selectedMission?.missionCode === mission.missionCode ? 'is-selected' : ''}`}
-            >
-              <div className="font-semibold">{mission.missionName}</div>
-              <div className="text-sm opacity-80 mt-0.5">{mission.content}</div>
-            </button>
-          ))}
+        <div className="grid grid-cols-3 gap-3 mb-4">
+          {missions.map((mission) => {
+            const status = selectedPlayer ? getMissionStatus(selectedPlayer.playerCode, mission.missionCode) : null;
+            return (
+              <button
+                key={mission.missionCode}
+                type="button"
+                onClick={() => setSelectedMission(mission)}
+                className={`chip-button ${selectedMission?.missionCode === mission.missionCode ? 'is-selected' : ''}`}
+              >
+                <div className="flex items-center gap-2">
+                  {status && <StarIcon variant={status as StarVariant} size="1.2em" />}
+                  <div className="flex-1">
+                    <div className="font-semibold">{mission.missionName}</div>
+                    <div className="text-sm opacity-80 mt-0.5">{mission.content}</div>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
         </div>
-        {selectedMission && selectedPlayer && (
-          <div className="pt-4 border-t border-[rgba(255,61,252,0.25)]">
-            <h4 className="section-title mb-3 text-center">{selectedMission.missionName}</h4>
-            <div className="flex justify-center gap-6">
-              {[{ type: 'bronze' }, { type: 'silver' }, { type: 'gold' }].map((star) => (
-                <button
-                  key={star.type}
-                  type="button"
-                  onClick={() => handleStarClick(star.type)}
-                  className="cursor-pointer hover:opacity-90 active:scale-95 transition-all"
-                >
-                  <span className={getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode) === star.type ? 'animate-star-pulse inline-block' : 'inline-block'}>
-                    <StarIcon
-                      variant={getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode) === star.type ? star.type as StarVariant : 'disabled'}
-                      size="3em"
-                    />
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
       <div className="card flex-1 flex flex-col">
@@ -246,7 +271,7 @@ const Home: React.FC = () => {
               <li key={player.playerCode}>
                 <div className="list-item">
                   <div className="flex items-center gap-3 min-w-0">
-                    <img src={player.photoUrl} alt={player.playerName} className="w-12 h-12 md:w-14 md:h-14 rounded-[var(--radius-md)] object-cover border border-[rgba(20,241,255,0.3)] flex-shrink-0" />
+                    <img src={player.photoUrl || noImageSrc} alt={player.playerName} className="w-12 h-12 md:w-14 md:h-14 rounded-[var(--radius-md)] object-cover border border-[rgba(20,241,255,0.3)] flex-shrink-0" onError={(e) => { e.currentTarget.src = noImageSrc; }} />
                     <div className="min-w-0">
                       <div className="font-semibold text-[var(--color-text)] truncate">{player.playerName}</div>
                       <div className="text-sm text-[var(--color-muted)]">{player.grade}</div>
