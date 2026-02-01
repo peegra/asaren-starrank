@@ -69,7 +69,8 @@ const Home: React.FC = () => {
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
   const [showAddPlayer, setShowAddPlayer] = useState(false);
-  const [newPlayer, setNewPlayer] = useState({ playerName: '', grade: '', comment: '', photoFile: null as File | null });
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [newPlayer, setNewPlayer] = useState({ playerName: '', grade: '', comment: '', photoFile: null as File | null, photoUrl: '' });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -98,55 +99,133 @@ const Home: React.FC = () => {
   };
 
   const getMissionStatus = (playerCode: string, missionCode: string) => {
-    return achievements.find(a => a.playerCode === playerCode && a.missionCode === missionCode)?.starType || null;
+    const missionAchievements = achievements.filter(a => a.playerCode === playerCode && a.missionCode === missionCode);
+    return {
+      bronze: missionAchievements.some(a => a.starType === 'bronze'),
+      silver: missionAchievements.some(a => a.starType === 'silver'),
+      gold: missionAchievements.some(a => a.starType === 'gold')
+    };
   };
 
-  const handleStarClick = async (starType: string) => {
+  const handleClearClick = async () => {
     if (!selectedPlayer || !selectedMission) return;
 
-    const existing = achievements.find(a => a.playerCode === selectedPlayer.playerCode && a.missionCode === selectedMission.missionCode);
-    if (existing) {
-      if (existing.starType === starType) {
-        await deleteDoc(doc(db, "achievements", existing.id));
-        setAchievements(achievements.filter(a => a.id !== existing.id));
-      } else {
-        await deleteDoc(doc(db, "achievements", existing.id));
-        const newAch = { playerCode: selectedPlayer.playerCode, missionCode: selectedMission.missionCode, starType, achievedAt: new Date() };
-        const docRef = await addDoc(collection(db, "achievements"), newAch);
-        setAchievements([...achievements.filter(a => a.id !== existing.id), { id: docRef.id, ...newAch }]);
+    const missionAchievements = achievements.filter(
+      a => a.playerCode === selectedPlayer.playerCode && a.missionCode === selectedMission.missionCode
+    );
+
+    const status = getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode);
+
+    // 全て獲得している場合はリセット確認
+    if (status.bronze && status.silver && status.gold) {
+      if (window.confirm('スターがリセットされます。よろしいですか？')) {
+        // 全ての星を削除
+        for (const ach of missionAchievements) {
+          await deleteDoc(doc(db, "achievements", ach.id));
+        }
+        setAchievements(achievements.filter(a => !missionAchievements.includes(a)));
       }
-    } else {
-      const newAch = { playerCode: selectedPlayer.playerCode, missionCode: selectedMission.missionCode, starType, achievedAt: new Date() };
-      const docRef = await addDoc(collection(db, "achievements"), newAch);
-      setAchievements([...achievements, { id: docRef.id, ...newAch }]);
+      return;
     }
+
+    // 次の星を追加
+    let nextStarType: string;
+    if (!status.bronze) {
+      nextStarType = 'bronze';
+    } else if (!status.silver) {
+      nextStarType = 'silver';
+    } else {
+      nextStarType = 'gold';
+    }
+
+    const newAch = {
+      playerCode: selectedPlayer.playerCode,
+      missionCode: selectedMission.missionCode,
+      starType: nextStarType,
+      achievedAt: new Date()
+    };
+    const docRef = await addDoc(collection(db, "achievements"), newAch);
+    setAchievements([...achievements, { id: docRef.id, ...newAch }]);
   };
 
   const handleAddPlayer = async () => {
-    if (!newPlayer.photoFile) {
+    if (!isEditMode && !newPlayer.photoFile) {
       alert('写真を選択してください。');
       return;
     }
 
     try {
-      const playerCode = `P${String(players.length + 1).padStart(3, '0')}`;
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d')!;
-      const img = new Image();
-      img.onload = async () => {
-        const maxWidth = 200;
-        const scale = maxWidth / img.width;
-        canvas.width = maxWidth;
-        canvas.height = img.height * scale;
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        const photoUrl = canvas.toDataURL('image/jpeg', 0.8);
-        const newP = { playerCode, playerName: newPlayer.playerName, grade: newPlayer.grade, comment: newPlayer.comment, photoUrl };
-        await addDoc(collection(db, "players"), newP);
-        setPlayers([...players, newP]);
-        setNewPlayer({ playerName: '', grade: '', comment: '', photoFile: null });
+      if (isEditMode && selectedPlayer) {
+        // 編集モード
+        let photoUrl = newPlayer.photoUrl || selectedPlayer.photoUrl;
+        
+        if (newPlayer.photoFile) {
+          // 新しい写真がアップロードされた場合
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d')!;
+          const img = new Image();
+          await new Promise((resolve) => {
+            img.onload = () => {
+              const maxWidth = 200;
+              const scale = maxWidth / img.width;
+              canvas.width = maxWidth;
+              canvas.height = img.height * scale;
+              ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+              photoUrl = canvas.toDataURL('image/jpeg', 0.8);
+              resolve(null);
+            };
+            img.src = URL.createObjectURL(newPlayer.photoFile!);
+          });
+        }
+
+        // Firestoreで該当する選手を更新
+        const playersSnapshot = await getDocs(collection(db, "players"));
+        const playerDoc = playersSnapshot.docs.find(doc => doc.data().playerCode === selectedPlayer.playerCode);
+        
+        if (playerDoc) {
+          const playerRef = doc(db, "players", playerDoc.id);
+          await deleteDoc(playerRef);
+          const updatedPlayer = {
+            playerCode: selectedPlayer.playerCode,
+            playerName: newPlayer.playerName,
+            grade: newPlayer.grade,
+            comment: newPlayer.comment,
+            photoUrl
+          };
+          await addDoc(collection(db, "players"), updatedPlayer);
+          
+          // ローカルステートを更新
+          const updatedPlayers = players.map(p => 
+            p.playerCode === selectedPlayer.playerCode ? updatedPlayer : p
+          );
+          setPlayers(updatedPlayers);
+          setSelectedPlayer(updatedPlayer);
+        }
+        
+        setNewPlayer({ playerName: '', grade: '', comment: '', photoFile: null, photoUrl: '' });
         setShowAddPlayer(false);
-      };
-      img.src = URL.createObjectURL(newPlayer.photoFile);
+        setIsEditMode(false);
+      } else {
+        // 新規登録モード
+        const playerCode = `P${String(players.length + 1).padStart(3, '0')}`;
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d')!;
+        const img = new Image();
+        img.onload = async () => {
+          const maxWidth = 200;
+          const scale = maxWidth / img.width;
+          canvas.width = maxWidth;
+          canvas.height = img.height * scale;
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          const photoUrl = canvas.toDataURL('image/jpeg', 0.8);
+          const newP = { playerCode, playerName: newPlayer.playerName, grade: newPlayer.grade, comment: newPlayer.comment, photoUrl };
+          await addDoc(collection(db, "players"), newP);
+          setPlayers([...players, newP]);
+          setNewPlayer({ playerName: '', grade: '', comment: '', photoFile: null, photoUrl: '' });
+          setShowAddPlayer(false);
+        };
+        img.src = URL.createObjectURL(newPlayer.photoFile!);
+      }
     } catch (error: any) {
       console.error('選手登録エラー:', error);
       alert(`登録に失敗しました: ${error.message}`);
@@ -209,22 +288,30 @@ const Home: React.FC = () => {
             <h4 className="section-title mb-0 text-center">{selectedMission.missionName}</h4>
             <p className="text-sm text-[var(--color-muted)]">{selectedMission.content}</p>
           </div>
-          <div className="flex justify-center gap-6">
-            {[{ type: 'bronze' }, { type: 'silver' }, { type: 'gold' }].map((star) => (
-              <button
-                key={star.type}
-                type="button"
-                onClick={() => handleStarClick(star.type)}
-                className="cursor-pointer hover:opacity-90 active:scale-95 transition-all"
-              >
-                <span className={getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode) === star.type ? 'animate-star-pulse inline-block' : 'inline-block'}>
-                  <StarIcon
-                    variant={getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode) === star.type ? star.type as StarVariant : 'disabled'}
-                    size="3em"
-                  />
-                </span>
-              </button>
-            ))}
+          <div className="flex justify-center items-center gap-6">
+            {/* 星の表示 */}
+            <div className="flex gap-4">
+              <StarIcon
+                variant={getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode).bronze ? 'bronze' : 'disabled'}
+                size="3em"
+              />
+              <StarIcon
+                variant={getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode).silver ? 'silver' : 'disabled'}
+                size="3em"
+              />
+              <StarIcon
+                variant={getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode).gold ? 'gold' : 'disabled'}
+                size="3em"
+              />
+            </div>
+            {/* クリアボタン */}
+            <button
+              type="button"
+              onClick={handleClearClick}
+              className="primary-button px-6 py-3 text-lg font-bold"
+            >
+              クリア
+            </button>
           </div>
         </div>
       )}
@@ -242,7 +329,13 @@ const Home: React.FC = () => {
                 className={`chip-button ${selectedMission?.missionCode === mission.missionCode ? 'is-selected' : ''}`}
               >
                 <div className="flex items-center gap-2">
-                  {status && <StarIcon variant={status as StarVariant} size="1.2em" />}
+                  {status && (
+                    <div className="flex gap-1">
+                      {status.bronze && <StarIcon variant="bronze" size="1.2em" />}
+                      {status.silver && <StarIcon variant="silver" size="1.2em" />}
+                      {status.gold && <StarIcon variant="gold" size="1.2em" />}
+                    </div>
+                  )}
                   <div className="flex-1">
                     <div className="font-semibold">{mission.missionName}</div>
                     <div className="text-sm opacity-80 mt-0.5">{mission.content}</div>
@@ -257,13 +350,41 @@ const Home: React.FC = () => {
       <div className="card flex-1 flex flex-col">
         <div className="flex justify-between items-center mb-4">
           <h3 className="section-title mb-0">選手リスト</h3>
-          <button
-            type="button"
-            onClick={() => setShowAddPlayer(true)}
-            className="primary-button w-12 h-12 p-0 rounded-full flex items-center justify-center text-xl"
-          >
-            +
-          </button>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                if (selectedPlayer) {
+                  setIsEditMode(true);
+                  setNewPlayer({
+                    playerName: selectedPlayer.playerName,
+                    grade: selectedPlayer.grade,
+                    comment: selectedPlayer.comment,
+                    photoFile: null,
+                    photoUrl: selectedPlayer.photoUrl
+                  });
+                  setShowAddPlayer(true);
+                } else {
+                  alert('編集する選手を選択してください。');
+                }
+              }}
+              className="secondary-button px-4 py-2 text-sm"
+              disabled={!selectedPlayer}
+            >
+              編集
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setIsEditMode(false);
+                setNewPlayer({ playerName: '', grade: '', comment: '', photoFile: null, photoUrl: '' });
+                setShowAddPlayer(true);
+              }}
+              className="primary-button w-12 h-12 p-0 rounded-full flex items-center justify-center text-xl"
+            >
+              +
+            </button>
+          </div>
         </div>
         <div className="list-card flex-1">
           <ul className="grid grid-cols-9 gap-2 list-none m-0 p-0">
@@ -291,7 +412,7 @@ const Home: React.FC = () => {
       {showAddPlayer && (
         <div className="modal-overlay">
           <div className="card modal-card">
-            <h3 className="card-title">選手登録</h3>
+            <h3 className="card-title">{isEditMode ? '選手編集' : '選手登録'}</h3>
             <div className="flex flex-col gap-3">
               <input
                 type="text"
@@ -300,13 +421,23 @@ const Home: React.FC = () => {
                 onChange={(e) => setNewPlayer({ ...newPlayer, playerName: e.target.value })}
                 className="pill-input"
               />
-              <input
-                type="text"
-                placeholder="学年"
+              <select
                 value={newPlayer.grade}
                 onChange={(e) => setNewPlayer({ ...newPlayer, grade: e.target.value })}
                 className="pill-input"
-              />
+              >
+                <option value="">学年を選択</option>
+                <option value="小1">小1</option>
+                <option value="小2">小2</option>
+                <option value="小3">小3</option>
+                <option value="小4">小4</option>
+                <option value="小5">小5</option>
+                <option value="小6">小6</option>
+                <option value="中1">中1</option>
+                <option value="中2">中2</option>
+                <option value="中3">中3</option>
+                <option value="大人">大人</option>
+              </select>
               <input
                 type="text"
                 placeholder="コメント"
@@ -320,13 +451,20 @@ const Home: React.FC = () => {
                 onChange={(e) => setNewPlayer({ ...newPlayer, photoFile: e.target.files?.[0] || null })}
                 className="input-file"
               />
+              {isEditMode && newPlayer.photoUrl && !newPlayer.photoFile && (
+                <div className="text-sm text-[var(--color-muted)]">※写真を変更しない場合は、ファイルを選択しないでください</div>
+              )}
             </div>
             <div className="flex justify-end gap-3 mt-5">
-              <button type="button" onClick={() => setShowAddPlayer(false)} className="secondary-button">
+              <button type="button" onClick={() => {
+                setShowAddPlayer(false);
+                setIsEditMode(false);
+                setNewPlayer({ playerName: '', grade: '', comment: '', photoFile: null, photoUrl: '' });
+              }} className="secondary-button">
                 キャンセル
               </button>
               <button type="button" onClick={handleAddPlayer} className="primary-button">
-                登録
+                {isEditMode ? '更新' : '登録'}
               </button>
             </div>
           </div>

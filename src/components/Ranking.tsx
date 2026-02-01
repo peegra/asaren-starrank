@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { collection, getDocs } from "firebase/firestore";
 import { db } from '../firebase';
+import noImageSrc from '../assets/noimage.png';
 
 interface Player {
   playerCode: string;
@@ -83,20 +84,33 @@ const Ranking: React.FC = () => {
             }}
           >
             <div className="flex items-center gap-3 min-w-0 flex-1">
-              <div
-                className="w-12 h-12 flex-shrink-0 rounded-[var(--radius-md)] flex items-center justify-center font-bold text-lg shrink-0"
-                style={{
-                  background: index === 0 ? 'linear-gradient(135deg, rgba(245,197,66,0.9), rgba(197,123,57,0.8))' : index === 1 ? 'rgba(192,199,209,0.4)' : index === 2 ? 'rgba(197,123,57,0.6)' : 'rgba(255,61,252,0.2)',
-                  color: index === 2 ? '#fff' : 'var(--color-text)',
-                }}
-              >
-                {index + 1}
+              {/* ランク番号を星形の中に表示 */}
+              <div className="relative w-12 h-12 flex-shrink-0 flex items-center justify-center">
+                <svg viewBox="0 0 24 24" width="48" height="48" style={{
+                  position: 'absolute',
+                  fill: index === 0 ? '#F5C542' : index === 1 ? '#C0C7D1' : index === 2 ? '#C57B39' : 'rgba(255,61,252,0.3)',
+                }}>
+                  <path d="M12 2l2.9 6 6.6.6-5 4.3 1.5 6.5L12 16l-6 3.4L7.5 13 2.5 8.6l6.6-.6L12 2z" />
+                </svg>
+                <span className="relative font-bold text-lg" style={{
+                  color: index === 0 || index === 1 ? '#000' : '#fff',
+                  textShadow: index === 0 ? 'none' : '0 1px 2px rgba(0,0,0,0.5)'
+                }}>
+                  {index + 1}
+                </span>
               </div>
-              <img
-                src={player.photoUrl}
-                alt={player.playerName}
-                className="w-12 h-12 md:w-14 md:h-14 rounded-[var(--radius-md)] object-cover border border-[rgba(20,241,255,0.3)] flex-shrink-0"
-              />
+              {/* 画像 - 常に同じサイズを確保 */}
+              <div className="w-12 h-12 flex-shrink-0 relative flex items-center justify-center">
+                <img
+                  src={player.photoUrl || noImageSrc}
+                  alt={player.playerName}
+                  className="w-full h-full rounded-[var(--radius-md)] object-cover border border-[rgba(20,241,255,0.3)]"
+                  onError={(e) => {
+                    e.currentTarget.src = noImageSrc;
+                    e.currentTarget.classList.add('max-w-4', 'max-h-4', 'w-auto', 'h-auto');
+                  }}
+                />
+              </div>
               <div className="min-w-0">
                 <h2 className="font-bold text-[var(--color-text)] truncate">{player.playerName}</h2>
                 <p className="text-sm text-[var(--color-muted)]">{player.grade}</p>
