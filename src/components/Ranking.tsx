@@ -78,56 +78,72 @@ const Ranking: React.FC = () => {
         {rankings.map((player, index) => (
           <div
             key={player.playerCode}
-            className="list-item"
+            className="list-item flex items-center justify-between"
             style={{
               borderColor: index === 0 ? 'rgba(245,197,66,0.45)' : index === 1 ? 'rgba(192,199,209,0.4)' : index === 2 ? 'rgba(197,123,57,0.4)' : undefined,
+              gap: '20px',
             }}
           >
-            <div className="flex items-center gap-3 min-w-0 flex-1">
+            {/* 左側：ランク・写真・名前 */}
+            <div className="flex items-center" style={{ gap: '12px', minWidth: 0, flex: 1 }}>
               {/* ランク番号を星形の中に表示 */}
-              <div className="relative w-12 h-12 flex-shrink-0 flex items-center justify-center">
-                <svg viewBox="0 0 24 24" width="48" height="48" style={{
+              <div className="relative flex-shrink-0 flex items-center justify-center" style={{ width: '72px', height: '72px' }}>
+                <svg viewBox="0 0 24 24" style={{
                   position: 'absolute',
                   fill: index === 0 ? '#F5C542' : index === 1 ? '#C0C7D1' : index === 2 ? '#C57B39' : 'rgba(255,61,252,0.3)',
+                  width: '72px',
+                  height: '72px',
                 }}>
                   <path d="M12 2l2.9 6 6.6.6-5 4.3 1.5 6.5L12 16l-6 3.4L7.5 13 2.5 8.6l6.6-.6L12 2z" />
                 </svg>
-                <span className="relative font-bold text-lg" style={{
+                <span className="relative font-bold" style={{
                   color: index === 0 || index === 1 ? '#000' : '#fff',
-                  textShadow: index === 0 ? 'none' : '0 1px 2px rgba(0,0,0,0.5)'
+                  textShadow: index === 0 ? 'none' : '0 1px 2px rgba(0,0,0,0.5)',
+                  fontSize: '24px',
                 }}>
                   {index + 1}
                 </span>
               </div>
+              
               {/* 画像 - 常に同じサイズを確保 */}
-              <div className="w-12 h-12 flex-shrink-0 relative flex items-center justify-center">
+              <div className="relative flex-shrink-0 flex items-center justify-center rounded-[var(--radius-md)] border border-[rgba(20,241,255,0.3)]" style={{ width: '72px', height: '72px', overflow: 'hidden' }}>
                 <img
                   src={player.photoUrl || noImageSrc}
                   alt={player.playerName}
-                  className="w-full h-full rounded-[var(--radius-md)] object-cover border border-[rgba(20,241,255,0.3)]"
+                  style={
+                    player.photoUrl
+                      ? { width: '100%', height: '100%', objectFit: 'cover' }
+                      : { width: '72px', height: '72px', objectFit: 'contain', padding: '4px' }
+                  }
                   onError={(e) => {
-                    e.currentTarget.src = noImageSrc;
-                    e.currentTarget.classList.add('max-w-4', 'max-h-4', 'w-auto', 'h-auto');
+                    e.currentTarget.style.width = '72px';
+                    e.currentTarget.style.height = '72px';
+                    e.currentTarget.style.objectFit = 'contain';
+                    e.currentTarget.style.padding = '4px';
                   }}
                 />
               </div>
-              <div className="min-w-0">
+              
+              {/* 名前・学年 */}
+              <div style={{ minWidth: 0, flex: 1 }}>
                 <h2 className="font-bold text-[var(--color-text)] truncate">{player.playerName}</h2>
                 <p className="text-sm text-[var(--color-muted)]">{player.grade}</p>
               </div>
             </div>
-            <div className="flex gap-3 flex-shrink-0">
+            
+            {/* 右側：スター取得数 */}
+            <div className="flex gap-4 flex-shrink-0">
               <div className="stat-pill gold">
                 <StarIcon variant="gold" size="1.25em" />
-                <span className="value text-sm">{player.gold}</span>
+                <span className="value text-sm font-semibold">{player.gold}</span>
               </div>
               <div className="stat-pill silver">
                 <StarIcon variant="silver" size="1.25em" />
-                <span className="value text-sm">{player.silver}</span>
+                <span className="value text-sm font-semibold">{player.silver}</span>
               </div>
               <div className="stat-pill bronze">
                 <StarIcon variant="bronze" size="1.25em" />
-                <span className="value text-sm">{player.bronze}</span>
+                <span className="value text-sm font-semibold">{player.bronze}</span>
               </div>
             </div>
           </div>
