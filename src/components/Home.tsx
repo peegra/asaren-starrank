@@ -82,6 +82,7 @@ const Home: React.FC = () => {
       const missionsSnap = await getDocs(collection(db, "missions"));
       const missionsData = missionsSnap.docs.map(doc => ({ ...doc.data() } as Mission));
       setMissions(missionsData);
+      if (missionsData.length > 0) setSelectedMission(missionsData[0]);
 
       const achievementsSnap = await getDocs(collection(db, "achievements"));
       const achievementsData = achievementsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Achievement));
@@ -310,7 +311,18 @@ const Home: React.FC = () => {
               onClick={handleClearClick}
               className="primary-button px-6 py-3 text-lg font-bold"
             >
-              クリア
+              {(() => {
+                const status = getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode);
+                if (status.bronze && status.silver && status.gold) {
+                  return 'ゲットしたスターをリセット';
+                } else if (status.silver && !status.gold) {
+                  return 'ゴールドゲット';
+                } else if (status.bronze && !status.silver) {
+                  return 'シルバーゲット';
+                } else {
+                  return 'ブロンズゲット';
+                }
+              })()}
             </button>
           </div>
         </div>
@@ -386,14 +398,15 @@ const Home: React.FC = () => {
             </button>
           </div>
         </div>
-        <div className="list-card flex-1">
-          <ul className="grid grid-cols-9 gap-2 list-none m-0 p-0">
+        <div className="list-card flex-1 overflow-x-auto">
+          <ul className="flex gap-2 list-none m-0 p-0" style={{ flexWrap: 'nowrap' }}>
             {players.map((player) => (
-              <li key={player.playerCode}>
+              <li key={player.playerCode} className="flex-shrink-0">
                 <button
                   type="button"
                   onClick={() => setSelectedPlayer(player)}
-                  className={`chip-button w-full ${selectedPlayer?.playerCode === player.playerCode ? 'is-selected' : ''}`}
+                  className={`chip-button ${selectedPlayer?.playerCode === player.playerCode ? 'is-selected' : ''}`}
+                  style={{ width: '110px' }}
                 >
                   <div className="flex flex-col items-center gap-1 overflow-hidden">
                     <div className="font-semibold text-[var(--color-text)] text-xs truncate w-full text-center">{player.playerName}</div>
