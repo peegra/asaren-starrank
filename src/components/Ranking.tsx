@@ -87,63 +87,63 @@ const Ranking: React.FC = () => {
             {/* 左側：ランク・写真・名前 */}
             <div className="flex items-center" style={{ gap: '12px', minWidth: 0, flex: 1 }}>
               {/* ランク番号を星形の中に表示 */}
-              <div className="relative flex-shrink-0 flex items-center justify-center" style={{ width: '72px', height: '72px' }}>
+              <div className="relative flex-shrink-0 flex items-center justify-center" style={{ width: '144px', height: '144px' }}>
                 <svg viewBox="0 0 24 24" style={{
                   position: 'absolute',
                   fill: index === 0 ? '#F5C542' : index === 1 ? '#C0C7D1' : index === 2 ? '#C57B39' : 'rgba(255,61,252,0.3)',
-                  width: '72px',
-                  height: '72px',
+                  width: '144px',
+                  height: '144px',
                 }}>
                   <path d="M12 2l2.9 6 6.6.6-5 4.3 1.5 6.5L12 16l-6 3.4L7.5 13 2.5 8.6l6.6-.6L12 2z" />
                 </svg>
                 <span className="relative font-bold" style={{
                   color: index === 0 || index === 1 ? '#000' : '#fff',
                   textShadow: index === 0 ? 'none' : '0 1px 2px rgba(0,0,0,0.5)',
-                  fontSize: '24px',
+                  fontSize: '48px',
                 }}>
                   {index + 1}
                 </span>
               </div>
               
               {/* 画像 - 常に同じサイズを確保 */}
-              <div className="relative flex-shrink-0 flex items-center justify-center rounded-[var(--radius-md)] border border-[rgba(20,241,255,0.3)]" style={{ width: '72px', height: '72px', overflow: 'hidden' }}>
+              <div className="relative flex-shrink-0 flex items-center justify-center rounded-[var(--radius-md)] border border-[rgba(20,241,255,0.3)]" style={{ width: '144px', height: '144px', overflow: 'hidden' }}>
                 <img
                   src={player.photoUrl || noImageSrc}
                   alt={player.playerName}
                   style={
                     player.photoUrl
                       ? { width: '100%', height: '100%', objectFit: 'cover' }
-                      : { width: '72px', height: '72px', objectFit: 'contain', padding: '4px' }
+                      : { width: '144px', height: '144px', objectFit: 'contain', padding: '8px' }
                   }
                   onError={(e) => {
-                    e.currentTarget.style.width = '72px';
-                    e.currentTarget.style.height = '72px';
+                    e.currentTarget.style.width = '144px';
+                    e.currentTarget.style.height = '144px';
                     e.currentTarget.style.objectFit = 'contain';
-                    e.currentTarget.style.padding = '4px';
+                    e.currentTarget.style.padding = '8px';
                   }}
                 />
               </div>
               
               {/* 名前・学年 */}
               <div style={{ minWidth: 0, flex: 1 }}>
-                <h2 className="font-bold text-[var(--color-text)] truncate">{player.playerName}</h2>
-                <p className="text-sm text-[var(--color-muted)]">{player.grade}</p>
+                <h2 className="font-bold text-[var(--color-text)] truncate" style={{ fontSize: '24px' }}>{player.playerName}</h2>
+                <p className="text-[var(--color-muted)]" style={{ fontSize: '16px' }}>{player.grade}</p>
               </div>
             </div>
             
             {/* 右側：スター取得数 */}
             <div className="flex gap-4 flex-shrink-0">
               <div className="stat-pill gold">
-                <StarIcon variant="gold" size="1.25em" />
-                <span className="value text-sm font-semibold">{player.gold}</span>
+                <StarIcon variant="gold" size="2.5em" />
+                <span className="value font-semibold" style={{ fontSize: '20px' }}>{player.gold}</span>
               </div>
               <div className="stat-pill silver">
-                <StarIcon variant="silver" size="1.25em" />
-                <span className="value text-sm font-semibold">{player.silver}</span>
+                <StarIcon variant="silver" size="2.5em" />
+                <span className="value font-semibold" style={{ fontSize: '20px' }}>{player.silver}</span>
               </div>
               <div className="stat-pill bronze">
-                <StarIcon variant="bronze" size="1.25em" />
-                <span className="value text-sm font-semibold">{player.bronze}</span>
+                <StarIcon variant="bronze" size="2.5em" />
+                <span className="value font-semibold" style={{ fontSize: '20px' }}>{player.bronze}</span>
               </div>
             </div>
           </div>
