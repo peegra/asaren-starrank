@@ -126,8 +126,8 @@ const Ranking: React.FC = () => {
               
               {/* 名前・学年 */}
               <div style={{ minWidth: 0, flex: 1 }}>
-                <h2 className="font-bold text-[var(--color-text)] truncate" style={{ fontSize: '24px' }}>{player.playerName}</h2>
-                <p className="text-[var(--color-muted)]" style={{ fontSize: '16px' }}>{player.grade}</p>
+                <h2 className="font-bold text-[var(--color-text)] truncate" style={{ fontSize: '48px' }}>{player.playerName}</h2>
+                <p className="text-[var(--color-muted)]" style={{ fontSize: '32px' }}>{player.grade}</p>
               </div>
             </div>
             
@@ -135,15 +135,15 @@ const Ranking: React.FC = () => {
             <div className="flex gap-4 flex-shrink-0">
               <div className="stat-pill gold">
                 <StarIcon variant="gold" size="2.5em" />
-                <span className="value font-semibold" style={{ fontSize: '20px' }}>{player.gold}</span>
+                <span className="value font-semibold" style={{ fontSize: '40px' }}>{player.gold}</span>
               </div>
               <div className="stat-pill silver">
                 <StarIcon variant="silver" size="2.5em" />
-                <span className="value font-semibold" style={{ fontSize: '20px' }}>{player.silver}</span>
+                <span className="value font-semibold" style={{ fontSize: '40px' }}>{player.silver}</span>
               </div>
               <div className="stat-pill bronze">
                 <StarIcon variant="bronze" size="2.5em" />
-                <span className="value font-semibold" style={{ fontSize: '20px' }}>{player.bronze}</span>
+                <span className="value font-semibold" style={{ fontSize: '40px' }}>{player.bronze}</span>
               </div>
             </div>
           </div>

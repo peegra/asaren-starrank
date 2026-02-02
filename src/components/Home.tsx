@@ -268,9 +268,18 @@ const Home: React.FC = () => {
 
             {/* 星マーク（中央1/3） */}
             <div className="col-span-1 flex flex-col items-center justify-center gap-4">
-              <StarIcon variant="gold" size="6em" />
-              <StarIcon variant="silver" size="6em" />
-              <StarIcon variant="bronze" size="6em" />
+              <div className="flex flex-col items-center gap-2">
+                <StarIcon variant="gold" size="6em" />
+                <span className="text-lg font-semibold text-[var(--color-text)]">GOLD</span>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <StarIcon variant="silver" size="6em" />
+                <span className="text-lg font-semibold text-[var(--color-text)]">SILVER</span>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <StarIcon variant="bronze" size="6em" />
+                <span className="text-lg font-semibold text-[var(--color-text)]">BRONZE</span>
+              </div>
             </div>
 
             {/* 星の数（右1/3） */}
