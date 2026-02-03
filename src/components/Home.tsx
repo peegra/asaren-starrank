@@ -167,11 +167,17 @@ const Home: React.FC = () => {
           const img = new Image();
           await new Promise((resolve) => {
             img.onload = () => {
-              const maxWidth = 200;
-              const scale = maxWidth / img.width;
-              canvas.width = maxWidth;
-              canvas.height = img.height * scale;
-              ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+              // 正方形に切り取る（200x200）
+              const size = 200;
+              canvas.width = size;
+              canvas.height = size;
+              
+              // 元の画像の中央をクロップ
+              const sourceSize = Math.min(img.width, img.height);
+              const sourceX = (img.width - sourceSize) / 2;
+              const sourceY = (img.height - sourceSize) / 2;
+              
+              ctx.drawImage(img, sourceX, sourceY, sourceSize, sourceSize, 0, 0, size, size);
               photoUrl = canvas.toDataURL('image/jpeg', 0.8);
               resolve(null);
             };
@@ -213,11 +219,17 @@ const Home: React.FC = () => {
         const ctx = canvas.getContext('2d')!;
         const img = new Image();
         img.onload = async () => {
-          const maxWidth = 200;
-          const scale = maxWidth / img.width;
-          canvas.width = maxWidth;
-          canvas.height = img.height * scale;
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          // 正方形に切り取る（200x200）
+          const size = 200;
+          canvas.width = size;
+          canvas.height = size;
+          
+          // 元の画像の中央をクロップ
+          const sourceSize = Math.min(img.width, img.height);
+          const sourceX = (img.width - sourceSize) / 2;
+          const sourceY = (img.height - sourceSize) / 2;
+          
+          ctx.drawImage(img, sourceX, sourceY, sourceSize, sourceSize, 0, 0, size, size);
           const photoUrl = canvas.toDataURL('image/jpeg', 0.8);
           const newP = { playerCode, playerName: newPlayer.playerName, grade: newPlayer.grade, comment: newPlayer.comment, photoUrl };
           await addDoc(collection(db, "players"), newP);
@@ -294,9 +306,15 @@ const Home: React.FC = () => {
 
       {selectedMission && selectedPlayer && (
         <div className="card">
-          <div className="flex items-center justify-center gap-4 mb-3">
-            <h4 className="section-title mb-0 text-center">{selectedMission.missionName}</h4>
-            <p className="text-sm text-[var(--color-muted)]">{selectedMission.content}</p>
+          <div className="grid grid-cols-3 gap-6 items-center mb-6">
+            {/* 左：タイトル（1/3、センター寄せ） */}
+            <div className="flex justify-center">
+              <h4 className="section-title mb-0 text-center" style={{ fontSize: '1.8em' }}>{selectedMission.missionName}</h4>
+            </div>
+            {/* 中央・右：説明（2/3、センター寄せ） */}
+            <div className="col-span-2 flex justify-center">
+              <p className="text-[var(--color-muted)] text-center" style={{ fontSize: '1.5em' }}>{selectedMission.content}</p>
+            </div>
           </div>
           <div className="flex justify-center items-center gap-6">
             {/* 星の表示 */}
@@ -348,19 +366,22 @@ const Home: React.FC = () => {
                 type="button"
                 onClick={() => setSelectedMission(mission)}
                 className={`chip-button ${selectedMission?.missionCode === mission.missionCode ? 'is-selected' : ''}`}
+                style={{ height: '180px', display: 'flex', flexDirection: 'row' }}
               >
-                <div className="flex items-center gap-2">
+                {/* 左側：星を縦並びで表示（ゴールド、シルバー、ブロンズ順） */}
+                <div className="flex flex-col gap-1" style={{ width: '64px', justifyContent: 'center', flexShrink: 0 }}>
                   {status && (
-                    <div className="flex gap-1">
-                      {status.bronze && <StarIcon variant="bronze" size="1.2em" />}
-                      {status.silver && <StarIcon variant="silver" size="1.2em" />}
-                      {status.gold && <StarIcon variant="gold" size="1.2em" />}
-                    </div>
+                    <>
+                      <div>{status.gold ? <StarIcon variant="gold" size="1.8em" /> : <div style={{ width: '1.8em', height: '1.8em' }}></div>}</div>
+                      <div>{status.silver ? <StarIcon variant="silver" size="1.8em" /> : <div style={{ width: '1.8em', height: '1.8em' }}></div>}</div>
+                      <div>{status.bronze ? <StarIcon variant="bronze" size="1.8em" /> : <div style={{ width: '1.8em', height: '1.8em' }}></div>}</div>
+                    </>
                   )}
-                  <div className="flex-1">
-                    <div className="font-semibold">{mission.missionName}</div>
-                    <div className="text-sm opacity-80 mt-0.5">{mission.content}</div>
-                  </div>
+                </div>
+                {/* 右側：タイトルと説明 */}
+                <div className="flex flex-col gap-2 flex-1 overflow-hidden pl-2">
+                  <div className="font-semibold text-sm">{mission.missionName}</div>
+                  <div className="text-xs opacity-80 line-clamp-2">{mission.content}</div>
                 </div>
               </button>
             );
@@ -407,20 +428,19 @@ const Home: React.FC = () => {
             </button>
           </div>
         </div>
-        <div className="list-card flex-1 overflow-x-auto">
-          <ul className="flex gap-2 list-none m-0 p-0" style={{ flexWrap: 'nowrap' }}>
+        <div className="list-card flex-1 overflow-x-auto" style={{ padding: '8px' }}>
+          <ul className="flex gap-1 list-none m-0 p-0" style={{ flexWrap: 'nowrap' }}>
             {players.map((player) => (
-              <li key={player.playerCode} className="flex-shrink-0">
+              <li key={player.playerCode} className="flex-shrink-0" style={{ height: '160px', display: 'flex' }}>
                 <button
                   type="button"
                   onClick={() => setSelectedPlayer(player)}
-                  className={`chip-button ${selectedPlayer?.playerCode === player.playerCode ? 'is-selected' : ''}`}
-                  style={{ width: '110px' }}
+                  className={`chip-button w-full ${selectedPlayer?.playerCode === player.playerCode ? 'is-selected' : ''}`}
+                  style={{ width: '130px', padding: '8px' }}
                 >
-                  <div className="flex flex-col items-center gap-1 overflow-hidden">
-                    <div className="font-semibold text-[var(--color-text)] text-xs truncate w-full text-center">{player.playerName}</div>
-                    <div className="text-xs text-[var(--color-muted)] truncate w-full text-center">{player.grade}</div>
-                    <div className="w-6 h-6 flex-shrink-0">
+                  <div className="flex flex-col items-center gap-2 overflow-hidden h-full">
+                    <div className="font-semibold text-[var(--color-text)] text-sm truncate w-full text-center flex-shrink-0">{player.playerName}</div>
+                    <div className="w-20 h-20 flex-shrink-0 flex items-center justify-center flex-1">
                       <img src={player.photoUrl || noImageSrc} alt={player.playerName} className="w-full h-full rounded object-cover border border-[rgba(20,241,255,0.3)] max-w-full max-h-full" onError={(e) => { e.currentTarget.src = noImageSrc; }} />
                     </div>
                   </div>
