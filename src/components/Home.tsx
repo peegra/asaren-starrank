@@ -312,21 +312,11 @@ const Home: React.FC = () => {
 
       {selectedMission && selectedPlayer && (
         <div className="card">
-          <div className="grid grid-cols-3 gap-6 items-center mb-6">
-            {/* 左：タイトル（1/3、センター寄せ） */}
-            <div className="flex justify-center">
-              <h4 className="section-title mb-0 text-center" style={{ fontSize: '1.8em' }}>{selectedMission.missionName}</h4>
-            </div>
-            {/* 中央・右：説明（2/3、センター寄せ） */}
-            <div className="col-span-2 flex justify-center">
-              <p className="text-[var(--color-muted)] text-center" style={{ fontSize: '1.5em' }}>{selectedMission.content}</p>
-            </div>
-          </div>
-          <div className="flex justify-center items-center gap-6">
-            {/* 星の表示 */}
-            <div className="flex gap-4">
+          {/* 一番上：星3つ（左）とタイトル（右）を横並び */}
+          <div className="flex items-center justify-center gap-6 mb-4">
+            <div className="flex gap-3 items-center">
               <StarIcon
-                variant={getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode).bronze ? 'bronze' : 'disabled'}
+                variant={getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode).gold ? 'gold' : 'disabled'}
                 size="3em"
               />
               <StarIcon
@@ -334,15 +324,30 @@ const Home: React.FC = () => {
                 size="3em"
               />
               <StarIcon
-                variant={getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode).gold ? 'gold' : 'disabled'}
+                variant={getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode).bronze ? 'bronze' : 'disabled'}
                 size="3em"
               />
             </div>
-            {/* クリアボタン */}
+            <h4 style={{ fontSize: '1.8em', margin: 0, lineHeight: 1, display: 'flex', alignItems: 'center', color: 'var(--color-accent)', fontWeight: 600 }}>{selectedMission.missionName}</h4>
+          </div>
+          
+          {/* 真ん中：説明 */}
+          <div className="flex justify-center mb-6">
+            <p className="text-[var(--color-muted)] text-center" style={{ fontSize: '1.5em' }}>{selectedMission.content}</p>
+          </div>
+          
+          {/* 下：ボタン */}
+          <div className="flex justify-center">
             <button
               type="button"
               onClick={handleClearClick}
-              className="primary-button px-6 py-3 text-lg font-bold"
+              className="primary-button font-bold"
+              style={{
+                padding: '1.2rem 2rem',
+                fontSize: '1.8rem',
+                animation: 'pulse-glow 2s ease-in-out infinite',
+                boxShadow: '0 0 20px rgba(20, 241, 255, 0.6), 0 0 40px rgba(20, 241, 255, 0.4), 0 16px 38px rgba(14, 165, 233, 0.42)'
+              }}
             >
               {(() => {
                 const status = getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode);
