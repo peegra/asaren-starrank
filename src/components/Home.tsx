@@ -249,7 +249,7 @@ const Home: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-5 flex-1">
-      <h1 className="card-title animate-bounce-in">選手状況確認</h1>
+      <h1 className="card-title animate-bounce-in">HOME</h1>
 
       {selectedPlayer && (
         <div className="card animate-bounce-in max-w-4xl mx-auto">
@@ -264,7 +264,7 @@ const Home: React.FC = () => {
               <p className="text-sm text-[var(--color-muted)]">{selectedPlayer.comment}</p>
             </div>
 
-            {/* 下部：選手写真（左1/3）、星マーク（中央1/3）、星の数（右1/3） */}
+            {/* 下部：選手写真（左1/3） */}
             <div className="col-span-1 flex flex-col items-center">
               <div className="w-full aspect-square flex-shrink-0 relative">
                 <img
@@ -278,31 +278,37 @@ const Home: React.FC = () => {
               </div>
             </div>
 
-            {/* 星マーク（中央1/3） */}
-            <div className="col-span-1 flex flex-col items-center justify-center gap-4">
-              <div className="flex flex-col items-center gap-2">
-                <StarIcon variant="gold" size="6em" />
-                <span className="text-lg font-semibold text-[var(--color-text)]">GOLD</span>
+            {/* 星と数字（中央2/3） - 横並びレイアウト */}
+            <div className="col-span-2 flex items-center justify-center gap-8">
+              {/* ゴールド */}
+              <div className="flex flex-col items-center justify-center gap-2" style={{ height: '100%' }}>
+                <StarIcon variant="gold" size="5em" />
+                <span className="text-base font-semibold text-[var(--color-text)]">GOLD</span>
+                <div className="font-bold text-[var(--color-text)]" style={{ fontSize: '4rem' }}>{gold}</div>
               </div>
-              <div className="flex flex-col items-center gap-2">
-                <StarIcon variant="silver" size="6em" />
-                <span className="text-lg font-semibold text-[var(--color-text)]">SILVER</span>
+              {/* シルバー */}
+              <div className="flex flex-col items-center justify-center gap-2" style={{ height: '100%' }}>
+                <StarIcon variant="silver" size="5em" />
+                <span className="text-base font-semibold text-[var(--color-text)]">SILVER</span>
+                <div className="font-bold text-[var(--color-text)]" style={{ fontSize: '4rem' }}>{silver}</div>
               </div>
-              <div className="flex flex-col items-center gap-2">
-                <StarIcon variant="bronze" size="6em" />
-                <span className="text-lg font-semibold text-[var(--color-text)]">BRONZE</span>
+              {/* ブロンズ */}
+              <div className="flex flex-col items-center justify-center gap-2" style={{ height: '100%' }}>
+                <StarIcon variant="bronze" size="5em" />
+                <span className="text-base font-semibold text-[var(--color-text)]">BRONZE</span>
+                <div className="font-bold text-[var(--color-text)]" style={{ fontSize: '4rem' }}>{bronze}</div>
               </div>
-            </div>
-
-            {/* 星の数（右1/3） */}
-            <div className="col-span-1 flex flex-col items-center justify-center gap-4">
-              <div className="font-bold text-[var(--color-text)]" style={{ fontSize: '6rem' }}>{gold}</div>
-              <div className="font-bold text-[var(--color-text)]" style={{ fontSize: '6rem' }}>{silver}</div>
-              <div className="font-bold text-[var(--color-text)]" style={{ fontSize: '6rem' }}>{bronze}</div>
             </div>
           </div>
         </div>
       )}
+
+      <h3 className="section-title mb-4 flex items-center justify-center gap-2">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2l2.9 6 6.6.6-5 4.3 1.5 6.5L12 16l-6 3.4L7.5 13 2.5 8.6l6.6-.6L12 2z"/>
+        </svg>
+        <span>MISSION</span>
+      </h3>
 
       {selectedMission && selectedPlayer && (
         <div className="card">
@@ -356,7 +362,6 @@ const Home: React.FC = () => {
       )}
 
       <div className="card">
-        <h3 className="section-title mb-4">⭐ MISSIONS</h3>
         <div className="grid grid-cols-3 gap-3 mb-4">
           {missions.map((mission) => {
             const status = selectedPlayer ? getMissionStatus(selectedPlayer.playerCode, mission.missionCode) : null;

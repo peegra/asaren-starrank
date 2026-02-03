@@ -73,7 +73,12 @@ const Mission: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-5 flex-1">
-      <h1 className="card-title">⭐ MISSIONS</h1>
+      <h1 className="card-title flex items-center justify-center gap-3">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2l2.9 6 6.6.6-5 4.3 1.5 6.5L12 16l-6 3.4L7.5 13 2.5 8.6l6.6-.6L12 2z"/>
+        </svg>
+        <span>MISSION</span>
+      </h1>
       <div className="flex flex-col gap-5">
         {missions.map((mission) => {
           const { gold, silver, bronze } = getStarSummary(mission.missionCode);

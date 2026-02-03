@@ -73,7 +73,13 @@ const Ranking: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-5 flex-1">
-      <h1 className="card-title">🏆 RANKINGS</h1>
+      <h1 className="card-title flex items-center justify-center gap-3">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="8" r="7"/>
+          <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
+        </svg>
+        <span>RANKING</span>
+      </h1>
       <div className="flex flex-col gap-3">
         {rankings.map((player, index) => (
           <div
