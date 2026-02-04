@@ -358,10 +358,6 @@ const Home: React.FC = () => {
             <button
               type="button"
               onClick={handleClearClick}
-              onTouchEnd={(e) => {
-                e.preventDefault();
-                handleClearClick(e as any);
-              }}
               className="font-bold"
               style={(() => {
                 const status = getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode);
@@ -376,8 +372,8 @@ const Home: React.FC = () => {
                     borderRadius: '0.5rem',
                     cursor: 'pointer',
                     transition: 'transform 0.2s, opacity 0.2s',
-                    WebkitTapHighlightColor: 'transparent',
-                    touchAction: 'manipulation',
+                    WebkitTapHighlightColor: 'transparent' as any,
+                    touchAction: 'manipulation' as any,
                   };
                 } else if (status.silver && !status.gold) {
                   // ゴールドクリア: ゴールド色
@@ -390,8 +386,8 @@ const Home: React.FC = () => {
                     borderRadius: '0.5rem',
                     cursor: 'pointer',
                     animation: 'pulse-glow-gold 2s ease-in-out infinite',
-                    WebkitTapHighlightColor: 'transparent',
-                    touchAction: 'manipulation',
+                    WebkitTapHighlightColor: 'transparent' as any,
+                    touchAction: 'manipulation' as any,
                   };
                 } else if (status.bronze && !status.silver) {
                   // シルバークリア: シルバー色
@@ -404,8 +400,8 @@ const Home: React.FC = () => {
                     borderRadius: '0.5rem',
                     cursor: 'pointer',
                     animation: 'pulse-glow-silver 2s ease-in-out infinite',
-                    WebkitTapHighlightColor: 'transparent',
-                    touchAction: 'manipulation',
+                    WebkitTapHighlightColor: 'transparent' as any,
+                    touchAction: 'manipulation' as any,
                   };
                 } else {
                   // ブロンズクリア: ブロンズ色
@@ -418,8 +414,8 @@ const Home: React.FC = () => {
                     borderRadius: '0.5rem',
                     cursor: 'pointer',
                     animation: 'pulse-glow-bronze 2s ease-in-out infinite',
-                    WebkitTapHighlightColor: 'transparent',
-                    touchAction: 'manipulation',
+                    WebkitTapHighlightColor: 'transparent' as any,
+                    touchAction: 'manipulation' as any,
                   };
                 }
               })()}
