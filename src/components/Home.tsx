@@ -355,24 +355,70 @@ const Home: React.FC = () => {
             <button
               type="button"
               onClick={handleClearClick}
-              className="primary-button font-bold"
-              style={{
-                padding: '1.2rem 2rem',
-                fontSize: '1.8rem',
-                animation: 'pulse-glow 2s ease-in-out infinite',
-                boxShadow: '0 0 20px rgba(20, 241, 255, 0.6), 0 0 40px rgba(20, 241, 255, 0.4), 0 16px 38px rgba(14, 165, 233, 0.42)'
-              }}
+              className="font-bold"
+              style={(() => {
+                const status = getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode);
+                if (status.bronze && status.silver && status.gold) {
+                  // リセットボタン: グレー、光らない
+                  return {
+                    padding: '1.2rem 2rem',
+                    fontSize: '1.8rem',
+                    backgroundColor: '#6b7280',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '0.5rem',
+                    cursor: 'pointer',
+                    transition: 'transform 0.2s, opacity 0.2s',
+                  };
+                } else if (status.silver && !status.gold) {
+                  // ゴールドクリア: ゴールド色
+                  return {
+                    padding: '1.2rem 2rem',
+                    fontSize: '1.8rem',
+                    backgroundColor: '#fbbf24',
+                    color: '#78350f',
+                    border: 'none',
+                    borderRadius: '0.5rem',
+                    cursor: 'pointer',
+                    animation: 'pulse-glow-gold 2s ease-in-out infinite',
+                  };
+                } else if (status.bronze && !status.silver) {
+                  // シルバークリア: シルバー色
+                  return {
+                    padding: '1.2rem 2rem',
+                    fontSize: '1.8rem',
+                    backgroundColor: '#d1d5db',
+                    color: '#1f2937',
+                    border: 'none',
+                    borderRadius: '0.5rem',
+                    cursor: 'pointer',
+                    animation: 'pulse-glow-silver 2s ease-in-out infinite',
+                  };
+                } else {
+                  // ブロンズクリア: ブロンズ色
+                  return {
+                    padding: '1.2rem 2rem',
+                    fontSize: '1.8rem',
+                    backgroundColor: '#b45309',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '0.5rem',
+                    cursor: 'pointer',
+                    animation: 'pulse-glow-bronze 2s ease-in-out infinite',
+                  };
+                }
+              })()}
             >
               {(() => {
                 const status = getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode);
                 if (status.bronze && status.silver && status.gold) {
                   return 'ゲットしたスターをリセット';
                 } else if (status.silver && !status.gold) {
-                  return 'ゴールドゲット';
+                  return 'ゴールドクリア！';
                 } else if (status.bronze && !status.silver) {
-                  return 'シルバーゲット';
+                  return 'シルバークリア！';
                 } else {
-                  return 'ブロンズゲット';
+                  return 'ブロンズクリア！';
                 }
               })()}
             </button>

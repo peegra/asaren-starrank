@@ -40,6 +40,33 @@ html {
   }
 }
 
+@keyframes pulse-glow-bronze {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(180, 83, 9, 0.6), 0 0 40px rgba(180, 83, 9, 0.4), 0 16px 38px rgba(180, 83, 9, 0.42);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(180, 83, 9, 0.9), 0 0 60px rgba(180, 83, 9, 0.6), 0 0 80px rgba(180, 83, 9, 0.3), 0 16px 38px rgba(180, 83, 9, 0.42);
+  }
+}
+
+@keyframes pulse-glow-silver {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(209, 213, 219, 0.8), 0 0 40px rgba(209, 213, 219, 0.5), 0 16px 38px rgba(156, 163, 175, 0.42);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(209, 213, 219, 1), 0 0 60px rgba(209, 213, 219, 0.8), 0 0 80px rgba(209, 213, 219, 0.4), 0 16px 38px rgba(156, 163, 175, 0.42);
+  }
+}
+
+@keyframes pulse-glow-gold {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.7), 0 0 40px rgba(251, 191, 36, 0.5), 0 16px 38px rgba(245, 158, 11, 0.42);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(251, 191, 36, 1), 0 0 60px rgba(251, 191, 36, 0.7), 0 0 80px rgba(251, 191, 36, 0.4), 0 16px 38px rgba(245, 158, 11, 0.42);
+  }
+}
+
 @layer base {
   body {
     font-family: "Segoe UI", "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;

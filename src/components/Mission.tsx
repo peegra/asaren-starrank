@@ -21,6 +21,43 @@ interface Player {
   playerName: string;
 }
 
+type StarVariant = "gold" | "silver" | "bronze" | "disabled";
+
+const STAR_COLORS: Record<StarVariant, string> = {
+  gold: "#F5C542",
+  silver: "#C0C7D1",
+  bronze: "#C57B39",
+  disabled: "rgba(255,255,255,0.18)",
+};
+
+function StarIcon({
+  variant = "gold",
+  size = "1.25em",
+  title = "star",
+}: {
+  variant?: StarVariant;
+  size?: string;
+  title?: string;
+}) {
+  const fill = STAR_COLORS[variant];
+
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      role="img"
+      aria-label={title}
+      style={{ display: "inline-block", verticalAlign: "-0.125em" }}
+    >
+      <path
+        fill={fill}
+        d="M12 2l2.9 6 6.6.6-5 4.3 1.5 6.5L12 16l-6 3.4L7.5 13 2.5 8.6l6.6-.6L12 2z"
+      />
+    </svg>
+  );
+}
+
 const Mission: React.FC = () => {
   const [missions, setMissions] = useState<Mission[]>([]);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
@@ -84,32 +121,70 @@ const Mission: React.FC = () => {
           const { gold, silver, bronze } = getStarSummary(mission.missionCode);
           return (
             <div key={mission.missionCode} className="card">
-              <h2 className="section-title mb-1">{mission.missionName}</h2>
-              <p className="text-[var(--color-muted)] mb-4 text-sm">{mission.content}</p>
-              <div className="flex flex-col gap-3">
-                <div className="achievement-block" style={{ borderColor: 'rgba(245,197,66,0.35)' }}>
-                  <h3 className="text-[#F5C542]">⭐ Gold ({gold.length})</h3>
-                  <ul>
+              <h2 className="section-title mb-1 text-center">{mission.missionName}</h2>
+              <p className="text-[var(--color-muted)] mb-4 text-sm text-center">{mission.content}</p>
+              <div className="flex flex-col gap-6">
+                {/* GOLD */}
+                <div>
+                  <h3 className="text-[#F5C542] flex items-center gap-2" style={{ fontSize: '2rem', marginBottom: '1rem' }}>
+                    <StarIcon variant="gold" size="2.5em" />
+                    <span>GOLD（クリア人数 {gold.length}人）</span>
+                  </h3>
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(3, 1fr)', 
+                    gap: '1rem',
+                    fontSize: 'clamp(1.4rem, 3.8vw, 1.6rem)'
+                  }}>
                     {gold.map((ach) => (
-                      <li key={ach.id}>{getPlayerName(ach.playerCode)} — {formatAchievedAt(ach.achievedAt)}</li>
+                      <div key={ach.id}>
+                        {getPlayerName(ach.playerCode)}<br />
+                        {formatAchievedAt(ach.achievedAt)}
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </div>
-                <div className="achievement-block" style={{ borderColor: 'rgba(192,199,209,0.35)' }}>
-                  <h3 className="text-[#C0C7D1]">⭐ Silver ({silver.length})</h3>
-                  <ul>
+                
+                {/* SILVER */}
+                <div>
+                  <h3 className="text-[#C0C7D1] flex items-center gap-2" style={{ fontSize: '2rem', marginBottom: '1rem' }}>
+                    <StarIcon variant="silver" size="2.5em" />
+                    <span>SILVER（クリア人数 {silver.length}人）</span>
+                  </h3>
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(3, 1fr)', 
+                    gap: '1rem',
+                    fontSize: 'clamp(1.4rem, 3.8vw, 1.6rem)'
+                  }}>
                     {silver.map((ach) => (
-                      <li key={ach.id}>{getPlayerName(ach.playerCode)} — {formatAchievedAt(ach.achievedAt)}</li>
+                      <div key={ach.id}>
+                        {getPlayerName(ach.playerCode)}<br />
+                        {formatAchievedAt(ach.achievedAt)}
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </div>
-                <div className="achievement-block" style={{ borderColor: 'rgba(197,123,57,0.35)' }}>
-                  <h3 className="text-[#C57B39]">⭐ Bronze ({bronze.length})</h3>
-                  <ul>
+                
+                {/* BRONZE */}
+                <div>
+                  <h3 className="text-[#C57B39] flex items-center gap-2" style={{ fontSize: '2rem', marginBottom: '1rem' }}>
+                    <StarIcon variant="bronze" size="2.5em" />
+                    <span>BRONZE（クリア人数 {bronze.length}人）</span>
+                  </h3>
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(3, 1fr)', 
+                    gap: '1rem',
+                    fontSize: 'clamp(1.4rem, 3.8vw, 1.6rem)'
+                  }}>
                     {bronze.map((ach) => (
-                      <li key={ach.id}>{getPlayerName(ach.playerCode)} — {formatAchievedAt(ach.achievedAt)}</li>
+                      <div key={ach.id}>
+                        {getPlayerName(ach.playerCode)}<br />
+                        {formatAchievedAt(ach.achievedAt)}
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </div>
               </div>
             </div>
