@@ -119,12 +119,20 @@ const Home: React.FC = () => {
 
     // 全て獲得している場合はリセット確認
     if (status.bronze && status.silver && status.gold) {
-      if (window.confirm('スターがリセットされます。よろしいですか？')) {
-        // 全ての星を削除
-        for (const ach of missionAchievements) {
-          await deleteDoc(doc(db, "achievements", ach.id));
-        }
+      const confirmed = window.confirm('スターがリセットされます。よろしいですか？');
+      if (!confirmed) {
+        return;
+      }
+      
+      try {
+        // 全ての星を並列で削除
+        await Promise.all(
+          missionAchievements.map(ach => deleteDoc(doc(db, "achievements", ach.id)))
+        );
         setAchievements(achievements.filter(a => !missionAchievements.includes(a)));
+      } catch (error) {
+        console.error('削除エラー:', error);
+        alert('削除に失敗しました。もう一度お試しください。');
       }
       return;
     }
@@ -145,8 +153,14 @@ const Home: React.FC = () => {
       starType: nextStarType,
       achievedAt: new Date()
     };
-    const docRef = await addDoc(collection(db, "achievements"), newAch);
-    setAchievements([...achievements, { id: docRef.id, ...newAch }]);
+    
+    try {
+      const docRef = await addDoc(collection(db, "achievements"), newAch);
+      setAchievements([...achievements, { id: docRef.id, ...newAch }]);
+    } catch (error) {
+      console.error('追加エラー:', error);
+      alert('スターの追加に失敗しました。もう一度お試しください。');
+    }
   };
 
   const handleAddPlayer = async () => {
@@ -463,20 +477,22 @@ const Home: React.FC = () => {
 
       {showAddPlayer && (
         <div className="modal-overlay">
-          <div className="card modal-card">
-            <h3 className="card-title">{isEditMode ? '選手編集' : '選手登録'}</h3>
-            <div className="flex flex-col gap-3">
+          <div className="card modal-card" style={{ padding: '2.5rem' }}>
+            <h3 className="card-title" style={{ fontSize: '2.5rem', marginBottom: '2rem' }}>{isEditMode ? '選手編集' : '選手登録'}</h3>
+            <div className="flex flex-col gap-6">
               <input
                 type="text"
                 placeholder="名前"
                 value={newPlayer.playerName}
                 onChange={(e) => setNewPlayer({ ...newPlayer, playerName: e.target.value })}
                 className="pill-input"
+                style={{ fontSize: '1.6rem', padding: '1.3rem 2rem' }}
               />
               <select
                 value={newPlayer.grade}
                 onChange={(e) => setNewPlayer({ ...newPlayer, grade: e.target.value })}
                 className="pill-input"
+                style={{ fontSize: '1.6rem', padding: '1.3rem 2rem' }}
               >
                 <option value="">学年を選択</option>
                 <option value="小1">小1</option>
@@ -496,26 +512,28 @@ const Home: React.FC = () => {
                 value={newPlayer.comment}
                 onChange={(e) => setNewPlayer({ ...newPlayer, comment: e.target.value })}
                 className="pill-input"
+                style={{ fontSize: '1.6rem', padding: '1.3rem 2rem' }}
               />
               <input
                 type="file"
                 accept="image/*"
                 onChange={(e) => setNewPlayer({ ...newPlayer, photoFile: e.target.files?.[0] || null })}
                 className="input-file"
+                style={{ fontSize: '1.6rem', padding: '1.5rem 2rem' }}
               />
               {isEditMode && newPlayer.photoUrl && !newPlayer.photoFile && (
-                <div className="text-sm text-[var(--color-muted)]">※写真を変更しない場合は、ファイルを選択しないでください</div>
+                <div className="text-[var(--color-muted)]" style={{ fontSize: '1.2rem' }}>※写真を変更しない場合は、ファイルを選択しないでください</div>
               )}
             </div>
-            <div className="flex justify-end gap-3 mt-5">
+            <div className="flex justify-end gap-4 mt-8">
               <button type="button" onClick={() => {
                 setShowAddPlayer(false);
                 setIsEditMode(false);
                 setNewPlayer({ playerName: '', grade: '', comment: '', photoFile: null, photoUrl: '' });
-              }} className="secondary-button">
+              }} className="secondary-button" style={{ fontSize: '1.6rem', padding: '1.2rem 2rem' }}>
                 キャンセル
               </button>
-              <button type="button" onClick={handleAddPlayer} className="primary-button">
+              <button type="button" onClick={handleAddPlayer} className="primary-button" style={{ fontSize: '1.6rem', padding: '1.2rem 2rem' }}>
                 {isEditMode ? '更新' : '登録'}
               </button>
             </div>
