@@ -70,7 +70,6 @@ const Home: React.FC = () => {
   const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
   const [showAddPlayer, setShowAddPlayer] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [newPlayer, setNewPlayer] = useState({ playerName: '', grade: '', comment: '', photoFile: null as File | null, photoUrl: '' });
 
   useEffect(() => {
@@ -109,14 +108,35 @@ const Home: React.FC = () => {
     };
   };
 
-  const handleClearClick = async () => {
+  const handleClearClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (!selectedPlayer || !selectedMission) return;
+
+    const missionAchievements = achievements.filter(
+      a => a.playerCode === selectedPlayer.playerCode && a.missionCode === selectedMission.missionCode
+    );
 
     const status = getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode);
 
-    // 全て獲得している場合はリセット確認モーダルを表示
+    // 全て獲得している場合はリセット確認
     if (status.bronze && status.silver && status.gold) {
-      setShowResetConfirm(true);
+      const confirmed = window.confirm('スターがリセットされます。よろしいですか？');
+      if (!confirmed) {
+        return;
+      }
+      
+      try {
+        // 全ての星を並列で削除
+        await Promise.all(
+          missionAchievements.map(ach => deleteDoc(doc(db, "achievements", ach.id)))
+        );
+        setAchievements(achievements.filter(a => !missionAchievements.includes(a)));
+      } catch (error) {
+        console.error('削除エラー:', error);
+        alert('削除に失敗しました。もう一度お試しください。');
+      }
       return;
     }
 
@@ -143,33 +163,6 @@ const Home: React.FC = () => {
     } catch (error) {
       console.error('追加エラー:', error);
       alert('スターの追加に失敗しました。もう一度お試しください。');
-    }
-  };
-
-  const handleResetConfirm = async () => {
-    if (!selectedPlayer || !selectedMission) return;
-
-    const missionAchievements = achievements.filter(
-      a => a.playerCode === selectedPlayer.playerCode && a.missionCode === selectedMission.missionCode
-    );
-
-    console.log('リセット実行開始:', missionAchievements.length, '件');
-    
-    try {
-      // 全ての星を1つずつ削除
-      for (const ach of missionAchievements) {
-        console.log('削除中:', ach.id);
-        await deleteDoc(doc(db, "achievements", ach.id));
-      }
-      
-      console.log('削除完了、ステート更新中');
-      setAchievements(achievements.filter(a => !missionAchievements.includes(a)));
-      console.log('ステート更新完了');
-      setShowResetConfirm(false);
-    } catch (error) {
-      console.error('削除エラー:', error);
-      alert('削除に失敗しました。もう一度お試しください。');
-      setShowResetConfirm(false);
     }
   };
 
@@ -365,6 +358,10 @@ const Home: React.FC = () => {
             <button
               type="button"
               onClick={handleClearClick}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                handleClearClick(e as any);
+              }}
               className="font-bold"
               style={(() => {
                 const status = getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode);
@@ -379,6 +376,8 @@ const Home: React.FC = () => {
                     borderRadius: '0.5rem',
                     cursor: 'pointer',
                     transition: 'transform 0.2s, opacity 0.2s',
+                    WebkitTapHighlightColor: 'transparent',
+                    touchAction: 'manipulation',
                   };
                 } else if (status.silver && !status.gold) {
                   // ゴールドクリア: ゴールド色
@@ -391,6 +390,8 @@ const Home: React.FC = () => {
                     borderRadius: '0.5rem',
                     cursor: 'pointer',
                     animation: 'pulse-glow-gold 2s ease-in-out infinite',
+                    WebkitTapHighlightColor: 'transparent',
+                    touchAction: 'manipulation',
                   };
                 } else if (status.bronze && !status.silver) {
                   // シルバークリア: シルバー色
@@ -403,6 +404,8 @@ const Home: React.FC = () => {
                     borderRadius: '0.5rem',
                     cursor: 'pointer',
                     animation: 'pulse-glow-silver 2s ease-in-out infinite',
+                    WebkitTapHighlightColor: 'transparent',
+                    touchAction: 'manipulation',
                   };
                 } else {
                   // ブロンズクリア: ブロンズ色
@@ -415,6 +418,8 @@ const Home: React.FC = () => {
                     borderRadius: '0.5rem',
                     cursor: 'pointer',
                     animation: 'pulse-glow-bronze 2s ease-in-out infinite',
+                    WebkitTapHighlightColor: 'transparent',
+                    touchAction: 'manipulation',
                   };
                 }
               })()}
@@ -591,46 +596,6 @@ const Home: React.FC = () => {
               </button>
               <button type="button" onClick={handleAddPlayer} className="primary-button" style={{ fontSize: '1.6rem', padding: '1.2rem 2rem' }}>
                 {isEditMode ? '更新' : '登録'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* リセット確認モーダル */}
-      {showResetConfirm && (
-        <div className="modal-overlay" onClick={() => setShowResetConfirm(false)}>
-          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-            <h2 className="section-title mb-6 text-center" style={{ fontSize: '2rem' }}>スターをリセット</h2>
-            <p className="text-[var(--color-text)] mb-8 text-center" style={{ fontSize: '1.6rem' }}>
-              {selectedPlayer?.playerName}さんの<br />
-              {selectedMission?.missionName}のスターがリセットされます。<br />
-              よろしいですか？
-            </p>
-            <div className="flex justify-center gap-4">
-              <button 
-                type="button" 
-                onClick={() => setShowResetConfirm(false)} 
-                className="secondary-button" 
-                style={{ fontSize: '1.6rem', padding: '1.2rem 2.5rem' }}
-              >
-                キャンセル
-              </button>
-              <button 
-                type="button" 
-                onClick={handleResetConfirm} 
-                style={{ 
-                  fontSize: '1.6rem', 
-                  padding: '1.2rem 2.5rem',
-                  backgroundColor: '#ef4444',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '0.5rem',
-                  cursor: 'pointer',
-                  fontWeight: 'bold'
-                }}
-              >
-                リセット
               </button>
             </div>
           </div>
