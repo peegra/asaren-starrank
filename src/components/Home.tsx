@@ -649,16 +649,19 @@ const Home: React.FC = () => {
       {/* 爆発的なクリア演出 */}
       {showFireworks && (
         <div className="celebration-container">
-          {/* 中心の光 */}
+          {/* 背景フラッシュ */}
+          <div className="celebration-flash" />
+          
+          {/* 中心の大きな光 */}
           <div className="celebration-center" />
           
-          {/* 丸いパーティクル */}
-          {Array.from({ length: 50 }).map((_, i) => {
-            const angle = (i / 50) * Math.PI * 2;
-            const distance = 200 + Math.random() * 300;
+          {/* 第1波：大きい丸いパーティクル */}
+          {Array.from({ length: 80 }).map((_, i) => {
+            const angle = (i / 80) * Math.PI * 2;
+            const distance = 400 + Math.random() * 500;
             const tx = Math.cos(angle) * distance;
             const ty = Math.sin(angle) * distance;
-            const colors = ['#F5C542', '#14f1ff', '#ff3dfc', '#38fdfc', '#C57B39', '#fbbf24'];
+            const colors = ['#F5C542', '#14f1ff', '#ff3dfc', '#38fdfc', '#C57B39', '#fbbf24', '#C0C7D1'];
             return (
               <div
                 key={`circle-${i}`}
@@ -667,10 +670,10 @@ const Home: React.FC = () => {
                   left: '50%',
                   top: '50%',
                   animationDelay: `${Math.random() * 0.1}s`,
-                  animationDuration: `${0.8 + Math.random() * 0.4}s`,
+                  animationDuration: `${1.2 + Math.random() * 0.6}s`,
                   backgroundColor: colors[Math.floor(Math.random() * colors.length)],
-                  width: `${12 + Math.random() * 8}px`,
-                  height: `${12 + Math.random() * 8}px`,
+                  width: `${20 + Math.random() * 30}px`,
+                  height: `${20 + Math.random() * 30}px`,
                   '--tx': `${tx}px`,
                   '--ty': `${ty}px`,
                 } as React.CSSProperties}
@@ -678,13 +681,39 @@ const Home: React.FC = () => {
             );
           })}
           
-          {/* 星形パーティクル */}
-          {Array.from({ length: 20 }).map((_, i) => {
-            const angle = (i / 20) * Math.PI * 2 + Math.random() * 0.5;
-            const distance = 150 + Math.random() * 250;
+          {/* 第2波：小さいパーティクル */}
+          {Array.from({ length: 60 }).map((_, i) => {
+            const angle = (i / 60) * Math.PI * 2 + Math.random() * 0.3;
+            const distance = 300 + Math.random() * 400;
             const tx = Math.cos(angle) * distance;
             const ty = Math.sin(angle) * distance;
-            const colors = ['#F5C542', '#ff3dfc', '#14f1ff'];
+            const colors = ['#F5C542', '#14f1ff', '#ff3dfc', '#fbbf24'];
+            return (
+              <div
+                key={`small-${i}`}
+                className="celebration-particle celebration-particle-small"
+                style={{
+                  left: '50%',
+                  top: '50%',
+                  animationDelay: `${0.1 + Math.random() * 0.15}s`,
+                  animationDuration: `${1.0 + Math.random() * 0.5}s`,
+                  backgroundColor: colors[Math.floor(Math.random() * colors.length)],
+                  width: `${12 + Math.random() * 16}px`,
+                  height: `${12 + Math.random() * 16}px`,
+                  '--tx': `${tx}px`,
+                  '--ty': `${ty}px`,
+                } as React.CSSProperties}
+              />
+            );
+          })}
+          
+          {/* 大きな星形パーティクル */}
+          {Array.from({ length: 40 }).map((_, i) => {
+            const angle = (i / 40) * Math.PI * 2 + Math.random() * 0.5;
+            const distance = 350 + Math.random() * 450;
+            const tx = Math.cos(angle) * distance;
+            const ty = Math.sin(angle) * distance;
+            const colors = ['#F5C542', '#ff3dfc', '#14f1ff', '#fbbf24'];
             return (
               <div
                 key={`star-${i}`}
@@ -692,14 +721,39 @@ const Home: React.FC = () => {
                 style={{
                   left: '50%',
                   top: '50%',
-                  animationDelay: `${Math.random() * 0.15}s`,
+                  animationDelay: `${Math.random() * 0.2}s`,
+                  animationDuration: `${1.3 + Math.random() * 0.5}s`,
                   color: colors[Math.floor(Math.random() * colors.length)],
-                  fontSize: `${20 + Math.random() * 20}px`,
+                  fontSize: `${40 + Math.random() * 40}px`,
                   '--tx': `${tx}px`,
                   '--ty': `${ty}px`,
                 } as React.CSSProperties}
               >
                 ★
+              </div>
+            );
+          })}
+          
+          {/* キラキラ光る小さな星 */}
+          {Array.from({ length: 30 }).map((_, i) => {
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 250 + Math.random() * 350;
+            const tx = Math.cos(angle) * distance;
+            const ty = Math.sin(angle) * distance;
+            return (
+              <div
+                key={`sparkle-${i}`}
+                className="celebration-sparkle"
+                style={{
+                  left: '50%',
+                  top: '50%',
+                  animationDelay: `${0.15 + Math.random() * 0.3}s`,
+                  fontSize: `${24 + Math.random() * 24}px`,
+                  '--tx': `${tx}px`,
+                  '--ty': `${ty}px`,
+                } as React.CSSProperties}
+              >
+                ✨
               </div>
             );
           })}
