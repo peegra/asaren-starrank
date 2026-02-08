@@ -110,24 +110,7 @@ const Home: React.FC = () => {
       gold: missionAchievements.some(a => a.starType === 'gold')
     };
   };
-  const playSound = (soundType: 'bronze' | 'silver' | 'gold') => {
-    try {
-      let audio: HTMLAudioElement;
-      if (soundType === 'bronze') {
-        audio = new Audio(bronzeSound);
-      } else if (soundType === 'silver') {
-        audio = new Audio(silverSound);
-      } else {
-        audio = new Audio(goldSound);
-      }
-      // iPhoneでも再生できるように、ユーザーインタラクション内で直接再生
-      audio.play().catch(err => {
-        console.error('音声再生エラー:', err);
-      });
-    } catch (error) {
-      console.error('音声ファイル読み込みエラー:', error);
-    }
-  };
+
   const handleClearClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -161,13 +144,29 @@ const Home: React.FC = () => {
     }
 
     // 次の星を追加
-    let nextStarType: string;
+    let nextStarType: 'bronze' | 'silver' | 'gold';
     if (!status.bronze) {
       nextStarType = 'bronze';
     } else if (!status.silver) {
       nextStarType = 'silver';
     } else {
       nextStarType = 'gold';
+    }
+
+    // iPhoneで音声を再生するため、クリックイベントの直接的なコンテキスト内で音声オブジェクトを作成
+    let audio: HTMLAudioElement;
+    try {
+      if (nextStarType === 'bronze') {
+        audio = new Audio(bronzeSound);
+      } else if (nextStarType === 'silver') {
+        audio = new Audio(silverSound);
+      } else {
+        audio = new Audio(goldSound);
+      }
+      // 音声の読み込みを開始（同期的に実行）
+      audio.load();
+    } catch (error) {
+      console.error('音声ファイル読み込みエラー:', error);
     }
 
     const newAch = {
@@ -181,8 +180,12 @@ const Home: React.FC = () => {
       const docRef = await addDoc(collection(db, "achievements"), newAch);
       setAchievements([...achievements, { id: docRef.id, ...newAch }]);
       
-      // 音声を再生
-      playSound(nextStarType as 'bronze' | 'silver' | 'gold');
+      // Firestore追加成功後に音声を再生
+      if (audio!) {
+        audio.play().catch(err => {
+          console.error('音声再生エラー:', err);
+        });
+      }
     } catch (error) {
       console.error('追加エラー:', error);
       alert('スターの追加に失敗しました。もう一度お試しください。');
