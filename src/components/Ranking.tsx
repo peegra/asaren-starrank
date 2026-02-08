@@ -72,7 +72,7 @@ const Ranking: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex flex-col gap-5 flex-1">
+    <div className="flex flex-col flex-1" style={{ gap: '12px' }}>
       <h1 className="card-title flex items-center justify-center gap-3">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="8" r="7"/>
@@ -80,7 +80,7 @@ const Ranking: React.FC = () => {
         </svg>
         <span>RANKING</span>
       </h1>
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col" style={{ gap: '8px' }}>
         {rankings.map((player, index) => (
           <div
             key={player.playerCode}

@@ -75,6 +75,7 @@ const Home: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [newPlayer, setNewPlayer] = useState({ playerName: '', grade: '', comment: '', photoFile: null as File | null, photoUrl: '' });
   const [audioUnlocked, setAudioUnlocked] = useState(false);
+  const [showFireworks, setShowFireworks] = useState(false);
   
   // Audio要素への参照（HTML要素として配置）
   const bronzeAudioRef = useRef<HTMLAudioElement>(null);
@@ -191,6 +192,10 @@ const Home: React.FC = () => {
     try {
       const docRef = await addDoc(collection(db, "achievements"), newAch);
       setAchievements([...achievements, { id: docRef.id, ...newAch }]);
+      
+      // 花火演出を表示
+      setShowFireworks(true);
+      setTimeout(() => setShowFireworks(false), 2000);
       
       // 音声を再生
       const audioRef = nextStarType === 'bronze' ? bronzeAudioRef : nextStarType === 'silver' ? silverAudioRef : goldAudioRef;
@@ -640,6 +645,66 @@ const Home: React.FC = () => {
       <audio ref={bronzeAudioRef} src={bronzeSound} preload="auto" />
       <audio ref={silverAudioRef} src={silverSound} preload="auto" />
       <audio ref={goldAudioRef} src={goldSound} preload="auto" />
+      
+      {/* 爆発的なクリア演出 */}
+      {showFireworks && (
+        <div className="celebration-container">
+          {/* 中心の光 */}
+          <div className="celebration-center" />
+          
+          {/* 丸いパーティクル */}
+          {Array.from({ length: 50 }).map((_, i) => {
+            const angle = (i / 50) * Math.PI * 2;
+            const distance = 200 + Math.random() * 300;
+            const tx = Math.cos(angle) * distance;
+            const ty = Math.sin(angle) * distance;
+            const colors = ['#F5C542', '#14f1ff', '#ff3dfc', '#38fdfc', '#C57B39', '#fbbf24'];
+            return (
+              <div
+                key={`circle-${i}`}
+                className="celebration-particle"
+                style={{
+                  left: '50%',
+                  top: '50%',
+                  animationDelay: `${Math.random() * 0.1}s`,
+                  animationDuration: `${0.8 + Math.random() * 0.4}s`,
+                  backgroundColor: colors[Math.floor(Math.random() * colors.length)],
+                  width: `${12 + Math.random() * 8}px`,
+                  height: `${12 + Math.random() * 8}px`,
+                  '--tx': `${tx}px`,
+                  '--ty': `${ty}px`,
+                } as React.CSSProperties}
+              />
+            );
+          })}
+          
+          {/* 星形パーティクル */}
+          {Array.from({ length: 20 }).map((_, i) => {
+            const angle = (i / 20) * Math.PI * 2 + Math.random() * 0.5;
+            const distance = 150 + Math.random() * 250;
+            const tx = Math.cos(angle) * distance;
+            const ty = Math.sin(angle) * distance;
+            const colors = ['#F5C542', '#ff3dfc', '#14f1ff'];
+            return (
+              <div
+                key={`star-${i}`}
+                className="celebration-star"
+                style={{
+                  left: '50%',
+                  top: '50%',
+                  animationDelay: `${Math.random() * 0.15}s`,
+                  color: colors[Math.floor(Math.random() * colors.length)],
+                  fontSize: `${20 + Math.random() * 20}px`,
+                  '--tx': `${tx}px`,
+                  '--ty': `${ty}px`,
+                } as React.CSSProperties}
+              >
+                ★
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
