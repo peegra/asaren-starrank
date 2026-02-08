@@ -377,11 +377,11 @@ const Home: React.FC = () => {
 
             {/* 下部：選手写真（左1/3） */}
             <div className="col-span-1 flex flex-col items-center">
-              <div className="w-full aspect-square flex-shrink-0 relative">
+              <div className="w-full aspect-square flex-shrink-0 relative rounded-[var(--radius-md)] overflow-hidden" style={{ border: 'none' }}>
                 <img
                   src={selectedPlayer.photoUrl || noImageSrc}
                   alt={selectedPlayer.playerName}
-                  className="w-full h-full rounded-md object-cover border-0 shadow-card"
+                  className="w-full h-full object-cover shadow-card"
                   onError={(e) => {
                     e.currentTarget.src = noImageSrc;
                   }}
@@ -578,8 +578,8 @@ const Home: React.FC = () => {
                 >
                   <div className="flex flex-col items-center gap-2 overflow-hidden h-full">
                     <div className="font-semibold text-[var(--color-text)] text-base truncate w-full text-center flex-shrink-0">{player.playerName}</div>
-                    <div className="w-24 h-24 flex-shrink-0 flex items-center justify-center flex-1">
-                      <img src={player.photoUrl || noImageSrc} alt={player.playerName} className="w-full h-full rounded object-cover border border-[rgba(20,241,255,0.3)] max-w-full max-h-full" onError={(e) => { e.currentTarget.src = noImageSrc; }} />
+                    <div className="w-24 h-24 flex-shrink-0 flex items-center justify-center flex-1 rounded-[var(--radius-md)] overflow-hidden" style={{ border: 'none' }}>
+                      <img src={player.photoUrl || noImageSrc} alt={player.playerName} className="w-full h-full object-cover max-w-full max-h-full" onError={(e) => { e.currentTarget.src = noImageSrc; }} />
                     </div>
                   </div>
                 </button>
