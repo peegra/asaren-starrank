@@ -138,7 +138,7 @@ const Ranking: React.FC = () => {
             </div>
             
             {/* 右側：スター取得数 */}
-            <div className="flex gap-4 flex-shrink-0">
+            <div className="flex flex-shrink-0" style={{ gap: '12px' }}>
               <div className="stat-pill gold">
                 <StarIcon variant="gold" size="2.5em" />
                 <span className="value font-semibold" style={{ fontSize: '40px' }}>{player.gold}</span>
