@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { collection, getDocs, addDoc, deleteDoc, doc } from "firebase/firestore";
 import { db } from '../firebase';
 import noImageSrc from '../assets/noimage.png';
@@ -75,11 +75,11 @@ const Home: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [newPlayer, setNewPlayer] = useState({ playerName: '', grade: '', comment: '', photoFile: null as File | null, photoUrl: '' });
   const [audioUnlocked, setAudioUnlocked] = useState(false);
-  const [audioObjects] = useState({
-    bronze: new Audio(bronzeSound),
-    silver: new Audio(silverSound),
-    gold: new Audio(goldSound)
-  });
+  
+  // Audio要素への参照（HTML要素として配置）
+  const bronzeAudioRef = useRef<HTMLAudioElement>(null);
+  const silverAudioRef = useRef<HTMLAudioElement>(null);
+  const goldAudioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -124,8 +124,9 @@ const Home: React.FC = () => {
     // 初回クリック時に音声をアンロック（無音再生）
     if (!audioUnlocked) {
       try {
+        const audioElements = [bronzeAudioRef.current, silverAudioRef.current, goldAudioRef.current].filter(Boolean) as HTMLAudioElement[];
         await Promise.all(
-          Object.values(audioObjects).map(audio => {
+          audioElements.map(audio => {
             return new Promise<void>(resolve => {
               try {
                 audio.muted = true;
@@ -197,11 +198,13 @@ const Home: React.FC = () => {
       setAchievements([...achievements, { id: docRef.id, ...newAch }]);
       
       // 音声を再生
-      const audio = audioObjects[nextStarType];
-      audio.currentTime = 0;
-      audio.play().catch(err => {
-        console.error('音声再生エラー:', err);
-      });
+      const audioRef = nextStarType === 'bronze' ? bronzeAudioRef : nextStarType === 'silver' ? silverAudioRef : goldAudioRef;
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(err => {
+          console.error('音声再生エラー:', err);
+        });
+      }
     } catch (error) {
       console.error('追加エラー:', error);
       alert('スターの追加に失敗しました。もう一度お試しください。');
@@ -639,6 +642,11 @@ const Home: React.FC = () => {
           </div>
         </div>
       )}
+      
+      {/* Audio要素をHTMLとして配置 */}
+      <audio ref={bronzeAudioRef} src={bronzeSound} preload="auto" />
+      <audio ref={silverAudioRef} src={silverSound} preload="auto" />
+      <audio ref={goldAudioRef} src={goldSound} preload="auto" />
     </div>
   );
 };
