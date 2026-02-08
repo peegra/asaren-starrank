@@ -74,6 +74,12 @@ const Home: React.FC = () => {
   const [showAddPlayer, setShowAddPlayer] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [newPlayer, setNewPlayer] = useState({ playerName: '', grade: '', comment: '', photoFile: null as File | null, photoUrl: '' });
+  const [audioUnlocked, setAudioUnlocked] = useState(false);
+  const [audioObjects] = useState({
+    bronze: new Audio(bronzeSound),
+    silver: new Audio(silverSound),
+    gold: new Audio(goldSound)
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -115,6 +121,32 @@ const Home: React.FC = () => {
     e.preventDefault();
     e.stopPropagation();
     
+    // 初回クリック時に音声をアンロック（無音再生）
+    if (!audioUnlocked) {
+      try {
+        await Promise.all(
+          Object.values(audioObjects).map(audio => {
+            return new Promise<void>(resolve => {
+              try {
+                audio.muted = true;
+                audio.play().then(() => {
+                  audio.pause();
+                  audio.currentTime = 0;
+                  audio.muted = false;
+                  resolve();
+                }).catch(() => resolve());
+              } catch (e) {
+                resolve();
+              }
+            });
+          })
+        );
+        setAudioUnlocked(true);
+      } catch (error) {
+        console.error('音声アンロックエラー:', error);
+      }
+    }
+    
     if (!selectedPlayer || !selectedMission) return;
 
     const missionAchievements = achievements.filter(
@@ -153,22 +185,6 @@ const Home: React.FC = () => {
       nextStarType = 'gold';
     }
 
-    // iPhoneで音声を再生するため、クリックイベントの直接的なコンテキスト内で音声オブジェクトを作成
-    let audio: HTMLAudioElement;
-    try {
-      if (nextStarType === 'bronze') {
-        audio = new Audio(bronzeSound);
-      } else if (nextStarType === 'silver') {
-        audio = new Audio(silverSound);
-      } else {
-        audio = new Audio(goldSound);
-      }
-      // 音声の読み込みを開始（同期的に実行）
-      audio.load();
-    } catch (error) {
-      console.error('音声ファイル読み込みエラー:', error);
-    }
-
     const newAch = {
       playerCode: selectedPlayer.playerCode,
       missionCode: selectedMission.missionCode,
@@ -180,12 +196,12 @@ const Home: React.FC = () => {
       const docRef = await addDoc(collection(db, "achievements"), newAch);
       setAchievements([...achievements, { id: docRef.id, ...newAch }]);
       
-      // Firestore追加成功後に音声を再生
-      if (audio!) {
-        audio.play().catch(err => {
-          console.error('音声再生エラー:', err);
-        });
-      }
+      // 音声を再生
+      const audio = audioObjects[nextStarType];
+      audio.currentTime = 0;
+      audio.play().catch(err => {
+        console.error('音声再生エラー:', err);
+      });
     } catch (error) {
       console.error('追加エラー:', error);
       alert('スターの追加に失敗しました。もう一度お試しください。');
