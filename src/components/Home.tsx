@@ -394,20 +394,20 @@ const Home: React.FC = () => {
               {/* ゴールド */}
               <div className="flex flex-col items-center justify-center gap-3" style={{ height: '100%' }}>
                 <StarIcon variant="gold" size="6em" />
-                <span className="text-lg font-semibold text-[var(--color-text)]">GOLD</span>
-                <div className="font-bold text-[var(--color-text)]" style={{ fontSize: '4.5rem' }}>{gold}</div>
+                <span className="text-lg font-semibold" style={{ color: '#F5C542', textShadow: '0 0 10px rgba(245,197,66,0.5)' }}>GOLD</span>
+                <div className="font-bold" style={{ fontSize: '4.5rem', color: '#F5C542', textShadow: '0 0 10px rgba(245,197,66,0.5)' }}>{gold}</div>
               </div>
               {/* シルバー */}
               <div className="flex flex-col items-center justify-center gap-3" style={{ height: '100%' }}>
                 <StarIcon variant="silver" size="6em" />
-                <span className="text-lg font-semibold text-[var(--color-text)]">SILVER</span>
-                <div className="font-bold text-[var(--color-text)]" style={{ fontSize: '4.5rem' }}>{silver}</div>
+                <span className="text-lg font-semibold" style={{ color: '#C0C7D1', textShadow: '0 0 8px rgba(192,199,209,0.4)' }}>SILVER</span>
+                <div className="font-bold" style={{ fontSize: '4.5rem', color: '#C0C7D1', textShadow: '0 0 8px rgba(192,199,209,0.4)' }}>{silver}</div>
               </div>
               {/* ブロンズ */}
               <div className="flex flex-col items-center justify-center gap-3" style={{ height: '100%' }}>
                 <StarIcon variant="bronze" size="6em" />
-                <span className="text-lg font-semibold text-[var(--color-text)]">BRONZE</span>
-                <div className="font-bold text-[var(--color-text)]" style={{ fontSize: '4.5rem' }}>{bronze}</div>
+                <span className="text-lg font-semibold" style={{ color: '#C57B39', textShadow: '0 0 8px rgba(197,123,57,0.4)' }}>BRONZE</span>
+                <div className="font-bold" style={{ fontSize: '4.5rem', color: '#C57B39', textShadow: '0 0 8px rgba(197,123,57,0.4)' }}>{bronze}</div>
               </div>
             </div>
           </div>
