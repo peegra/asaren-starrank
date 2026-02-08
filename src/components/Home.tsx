@@ -482,37 +482,35 @@ const Home: React.FC = () => {
         </div>
       )}
 
-      <div className="card">
-        <div className="grid grid-cols-3 gap-3 mb-4">
-          {missions.map((mission) => {
-            const status = selectedPlayer ? getMissionStatus(selectedPlayer.playerCode, mission.missionCode) : null;
-            return (
-              <button
-                key={mission.missionCode}
-                type="button"
-                onClick={() => setSelectedMission(mission)}
-                className={`chip-button ${selectedMission?.missionCode === mission.missionCode ? 'is-selected' : ''}`}
-                style={{ height: '180px', display: 'flex', flexDirection: 'row' }}
-              >
-                {/* 左側：星を縦並びで表示（ゴールド、シルバー、ブロンズ順） */}
-                <div className="flex flex-col gap-1" style={{ width: '64px', justifyContent: 'center', flexShrink: 0 }}>
-                  {status && (
-                    <>
-                      <div>{status.gold ? <StarIcon variant="gold" size="1.8em" /> : <div style={{ width: '1.8em', height: '1.8em' }}></div>}</div>
-                      <div>{status.silver ? <StarIcon variant="silver" size="1.8em" /> : <div style={{ width: '1.8em', height: '1.8em' }}></div>}</div>
-                      <div>{status.bronze ? <StarIcon variant="bronze" size="1.8em" /> : <div style={{ width: '1.8em', height: '1.8em' }}></div>}</div>
-                    </>
-                  )}
-                </div>
-                {/* 右側：タイトルと説明 */}
-                <div className="flex flex-col gap-2 flex-1 overflow-hidden pl-2">
-                  <div className="font-semibold text-sm">{mission.missionName}</div>
-                  <div className="text-xs opacity-80 line-clamp-2">{mission.content}</div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
+      <div className="grid grid-cols-3 mb-4" style={{ gap: '8px' }}>
+        {missions.map((mission) => {
+          const status = selectedPlayer ? getMissionStatus(selectedPlayer.playerCode, mission.missionCode) : null;
+          return (
+            <button
+              key={mission.missionCode}
+              type="button"
+              onClick={() => setSelectedMission(mission)}
+              className={`chip-button ${selectedMission?.missionCode === mission.missionCode ? 'is-selected' : ''}`}
+              style={{ height: '180px', display: 'flex', flexDirection: 'row' }}
+            >
+              {/* 左側：星を縦並びで表示（ゴールド、シルバー、ブロンズ順） */}
+              <div className="flex flex-col gap-1" style={{ width: '64px', justifyContent: 'center', flexShrink: 0 }}>
+                {status && (
+                  <>
+                    <div>{status.gold ? <StarIcon variant="gold" size="1.8em" /> : <div style={{ width: '1.8em', height: '1.8em' }}></div>}</div>
+                    <div>{status.silver ? <StarIcon variant="silver" size="1.8em" /> : <div style={{ width: '1.8em', height: '1.8em' }}></div>}</div>
+                    <div>{status.bronze ? <StarIcon variant="bronze" size="1.8em" /> : <div style={{ width: '1.8em', height: '1.8em' }}></div>}</div>
+                  </>
+                )}
+              </div>
+              {/* 右側：タイトルと説明 */}
+              <div className="flex flex-col gap-1 flex-1 overflow-hidden pl-2">
+                <div className="font-semibold text-sm">{mission.missionName}</div>
+                <div className="text-xs opacity-80 line-clamp-2">{mission.content}</div>
+              </div>
+            </button>
+          );
+        })}
       </div>
 
       <div className="card flex-1 flex flex-col">
