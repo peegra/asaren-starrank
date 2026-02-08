@@ -311,6 +311,30 @@ const Home: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-5 flex-1">
+      <div style={{ marginTop: '12px', marginBottom: '12px' }}>
+        <div className="flex-1 overflow-x-auto" style={{ padding: '8px' }}>
+          <ul className="flex list-none m-0 p-0" style={{ flexWrap: 'nowrap', gap: '12px' }}>
+            {players.map((player) => (
+              <li key={player.playerCode} className="flex-shrink-0" style={{ height: '180px', display: 'flex' }}>
+                <button
+                  type="button"
+                  onClick={() => setSelectedPlayer(player)}
+                  className={`chip-button w-full ${selectedPlayer?.playerCode === player.playerCode ? 'is-selected' : ''}`}
+                  style={{ width: '150px', padding: '10px' }}
+                >
+                  <div className="flex flex-col items-center gap-2 overflow-hidden h-full">
+                    <div className="font-semibold text-[var(--color-text)] text-base truncate w-full text-center flex-shrink-0">{player.playerName}</div>
+                    <div className="w-24 h-24 flex-shrink-0 flex items-center justify-center flex-1 rounded-[var(--radius-md)] overflow-hidden" style={{ border: 'none' }}>
+                      <img src={player.photoUrl || noImageSrc} alt={player.playerName} className="w-full h-full object-cover max-w-full max-h-full" onError={(e) => { e.currentTarget.src = noImageSrc; }} />
+                    </div>
+                  </div>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
       <div className="flex items-center justify-center">
         <h1 className="card-title animate-bounce-in mb-0 text-center w-full">HOME</h1>
       </div>
@@ -563,30 +587,6 @@ const Home: React.FC = () => {
             </button>
           );
         })}
-      </div>
-
-      <div className="card flex-1 flex flex-col">
-        <div className="flex-1 overflow-x-auto" style={{ padding: '8px' }}>
-          <ul className="flex list-none m-0 p-0" style={{ flexWrap: 'nowrap', gap: '12px' }}>
-            {players.map((player) => (
-              <li key={player.playerCode} className="flex-shrink-0" style={{ height: '180px', display: 'flex' }}>
-                <button
-                  type="button"
-                  onClick={() => setSelectedPlayer(player)}
-                  className={`chip-button w-full ${selectedPlayer?.playerCode === player.playerCode ? 'is-selected' : ''}`}
-                  style={{ width: '150px', padding: '10px' }}
-                >
-                  <div className="flex flex-col items-center gap-2 overflow-hidden h-full">
-                    <div className="font-semibold text-[var(--color-text)] text-base truncate w-full text-center flex-shrink-0">{player.playerName}</div>
-                    <div className="w-24 h-24 flex-shrink-0 flex items-center justify-center flex-1 rounded-[var(--radius-md)] overflow-hidden" style={{ border: 'none' }}>
-                      <img src={player.photoUrl || noImageSrc} alt={player.playerName} className="w-full h-full object-cover max-w-full max-h-full" onError={(e) => { e.currentTarget.src = noImageSrc; }} />
-                    </div>
-                  </div>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
       </div>
 
       {showAddPlayer && (
