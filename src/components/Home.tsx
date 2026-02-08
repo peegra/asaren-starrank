@@ -156,13 +156,8 @@ const Home: React.FC = () => {
 
     const status = getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode);
 
-    // 全て獲得している場合はリセット確認
+    // 全て獲得している場合はリセット
     if (status.bronze && status.silver && status.gold) {
-      const confirmed = window.confirm('スターがリセットされます。よろしいですか？');
-      if (!confirmed) {
-        return;
-      }
-      
       try {
         // 全ての星を並列で削除
         await Promise.all(
