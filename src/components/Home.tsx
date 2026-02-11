@@ -1,7 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { collection, getDocs, addDoc, deleteDoc, doc } from "firebase/firestore";
+import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { db } from '../firebase';
-import noImageSrc from '../assets/noimage.png';
+const noImageSrc = `${import.meta.env.BASE_URL}noimage.png`;
+
+const resolvePhotoUrl = (photoUrl?: string) => {
+  if (!photoUrl || photoUrl === '/noimage.png') return noImageSrc;
+  return photoUrl;
+};
 import bronzeSound from '../assets/bronze.mp3';
 import silverSound from '../assets/silver.mp3';
 import goldSound from '../assets/gold.mp3';
@@ -12,6 +17,7 @@ interface Player {
   grade: string;
   comment: string;
   photoUrl: string;
+  isDeleted?: boolean;
 }
 
 interface Mission {
@@ -46,6 +52,7 @@ function StarIcon({
   size?: string;
   title?: string;
 }) {
+  const isDisabled = variant === "disabled";
   const fill = STAR_COLORS[variant];
 
   return (
@@ -58,7 +65,11 @@ function StarIcon({
       style={{ display: "inline-block", verticalAlign: "-0.125em" }}
     >
       <path
-        fill={fill}
+        fill={isDisabled ? "none" : fill}
+        stroke={isDisabled ? "var(--color-muted)" : "none"}
+        strokeWidth={isDisabled ? 1.6 : 0}
+        strokeLinejoin="round"
+        strokeOpacity={isDisabled ? 0.7 : 1}
         d="M12 2l2.9 6 6.6.6-5 4.3 1.5 6.5L12 16l-6 3.4L7.5 13 2.5 8.6l6.6-.6L12 2z"
       />
     </svg>
@@ -76,6 +87,14 @@ const Home: React.FC = () => {
   const [newPlayer, setNewPlayer] = useState({ playerName: '', grade: '', comment: '', photoFile: null as File | null, photoUrl: '' });
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const [showFireworks, setShowFireworks] = useState(false);
+
+  const getGradeOrder = (grade: string) => {
+    const match = grade.match(/(小|中)(\d+)/);
+    if (!match) return Number.MAX_SAFE_INTEGER;
+    const [, group, year] = match;
+    const base = group === '小' ? 0 : 10;
+    return base + Number(year);
+  };
   
   // Audio要素への参照（HTML要素として配置）
   const bronzeAudioRef = useRef<HTMLAudioElement>(null);
@@ -86,8 +105,14 @@ const Home: React.FC = () => {
     const fetchData = async () => {
       const playersSnap = await getDocs(collection(db, "players"));
       const playersData = playersSnap.docs.map(doc => ({ ...doc.data() } as Player));
-      setPlayers(playersData);
-      if (playersData.length > 0) setSelectedPlayer(playersData[0]);
+      const activePlayers = playersData.filter(player => !player.isDeleted);
+      const sortedPlayers = [...activePlayers].sort((a, b) => {
+        const gradeDiff = getGradeOrder(a.grade) - getGradeOrder(b.grade);
+        if (gradeDiff !== 0) return gradeDiff;
+        return a.playerName.localeCompare(b.playerName, 'ja');
+      });
+      setPlayers(sortedPlayers);
+      if (sortedPlayers.length > 0) setSelectedPlayer(sortedPlayers[0]);
 
       const missionsSnap = await getDocs(collection(db, "missions"));
       const missionsData = missionsSnap.docs.map(doc => ({ ...doc.data() } as Mission));
@@ -213,7 +238,20 @@ const Home: React.FC = () => {
 
   const handleAddPlayer = async () => {
     if (!isEditMode && !newPlayer.photoFile) {
-      alert('写真を選択してください。');
+      // 写真がない場合はデフォルト画像を使う
+      const playerCode = `P${String(players.length + 1).padStart(3, '0')}`;
+      const newP = {
+        playerCode,
+        playerName: newPlayer.playerName,
+        grade: newPlayer.grade,
+        comment: newPlayer.comment,
+        photoUrl: noImageSrc,
+        isDeleted: false,
+      };
+      await addDoc(collection(db, "players"), newP);
+      setPlayers([...players, newP]);
+      setNewPlayer({ playerName: '', grade: '', comment: '', photoFile: null, photoUrl: '' });
+      setShowAddPlayer(false);
       return;
     }
 
@@ -259,7 +297,8 @@ const Home: React.FC = () => {
             playerName: newPlayer.playerName,
             grade: newPlayer.grade,
             comment: newPlayer.comment,
-            photoUrl
+            photoUrl,
+            isDeleted: false,
           };
           await addDoc(collection(db, "players"), updatedPlayer);
           
@@ -293,7 +332,7 @@ const Home: React.FC = () => {
           
           ctx.drawImage(img, sourceX, sourceY, sourceSize, sourceSize, 0, 0, size, size);
           const photoUrl = canvas.toDataURL('image/jpeg', 0.8);
-          const newP = { playerCode, playerName: newPlayer.playerName, grade: newPlayer.grade, comment: newPlayer.comment, photoUrl };
+          const newP = { playerCode, playerName: newPlayer.playerName, grade: newPlayer.grade, comment: newPlayer.comment, photoUrl, isDeleted: false };
           await addDoc(collection(db, "players"), newP);
           setPlayers([...players, newP]);
           setNewPlayer({ playerName: '', grade: '', comment: '', photoFile: null, photoUrl: '' });
@@ -309,8 +348,39 @@ const Home: React.FC = () => {
 
   const { gold, silver, bronze } = selectedPlayer ? getStarCounts(selectedPlayer.playerCode) : { gold: 0, silver: 0, bronze: 0 };
 
+  const handleDeletePlayer = async () => {
+    if (!selectedPlayer) return;
+    if (!window.confirm('この選手を削除しますか？（後で復元可能な論理削除です）')) return;
+    try {
+      const playersSnapshot = await getDocs(collection(db, "players"));
+      const playerDoc = playersSnapshot.docs.find(doc => doc.data().playerCode === selectedPlayer.playerCode);
+      if (!playerDoc) return;
+      await updateDoc(doc(db, "players", playerDoc.id), { isDeleted: true });
+
+      const updatedPlayers = players.filter(p => p.playerCode !== selectedPlayer.playerCode);
+      setPlayers(updatedPlayers);
+      setSelectedPlayer(updatedPlayers[0] ?? null);
+      setShowAddPlayer(false);
+      setIsEditMode(false);
+      setNewPlayer({ playerName: '', grade: '', comment: '', photoFile: null, photoUrl: '' });
+    } catch (error) {
+      console.error('削除エラー:', error);
+      alert('削除に失敗しました。もう一度お試しください。');
+    }
+  };
+
   return (
     <div className="flex flex-col gap-5 flex-1">
+      <div className="flex items-center justify-center">
+        <h1 className="card-title animate-bounce-in text-center w-full flex items-center justify-center gap-3">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          <span>HOME</span>
+        </h1>
+      </div>
+
       <div style={{ marginTop: '12px', marginBottom: '12px' }}>
         <div className="flex-1 overflow-x-auto" style={{ padding: '8px' }}>
           <ul className="flex list-none m-0 p-0" style={{ flexWrap: 'nowrap', gap: '12px' }}>
@@ -325,7 +395,7 @@ const Home: React.FC = () => {
                   <div className="flex flex-col items-center gap-2 overflow-hidden h-full">
                     <div className="font-semibold text-[var(--color-text)] text-base truncate w-full text-center flex-shrink-0">{player.playerName}</div>
                     <div className="w-24 h-24 flex-shrink-0 flex items-center justify-center flex-1 rounded-[var(--radius-md)] overflow-hidden" style={{ border: 'none' }}>
-                      <img src={player.photoUrl || noImageSrc} alt={player.playerName} className="w-full h-full object-cover max-w-full max-h-full" onError={(e) => { e.currentTarget.src = noImageSrc; }} />
+                      <img src={resolvePhotoUrl(player.photoUrl)} alt={player.playerName} className="w-full h-full object-cover max-w-full max-h-full" onError={(e) => { e.currentTarget.src = noImageSrc; }} />
                     </div>
                   </div>
                 </button>
@@ -333,10 +403,6 @@ const Home: React.FC = () => {
             ))}
           </ul>
         </div>
-      </div>
-
-      <div className="flex items-center justify-center">
-        <h1 className="card-title animate-bounce-in mb-0 text-center w-full">HOME</h1>
       </div>
 
       {selectedPlayer && (
@@ -403,7 +469,7 @@ const Home: React.FC = () => {
             <div className="col-span-1 flex flex-col items-center">
               <div className="w-full aspect-square flex-shrink-0 relative rounded-[var(--radius-md)] overflow-hidden" style={{ border: 'none' }}>
                 <img
-                  src={selectedPlayer.photoUrl || noImageSrc}
+                  src={resolvePhotoUrl(selectedPlayer.photoUrl)}
                   alt={selectedPlayer.playerName}
                   className="w-full h-full object-cover shadow-card"
                   onError={(e) => {
@@ -582,7 +648,7 @@ const Home: React.FC = () => {
               {/* 右側：タイトルと説明 */}
               <div className="flex flex-col gap-1 flex-1 overflow-hidden pl-2">
                 <div className="font-semibold text-sm">{mission.missionName}</div>
-                <div className="text-xs opacity-80 line-clamp-2">{mission.content}</div>
+                <div className="text-xs opacity-80 line-clamp-3">{mission.content}</div>
               </div>
             </button>
           );
@@ -600,13 +666,13 @@ const Home: React.FC = () => {
                 value={newPlayer.playerName}
                 onChange={(e) => setNewPlayer({ ...newPlayer, playerName: e.target.value })}
                 className="pill-input"
-                style={{ fontSize: '1.6rem', padding: '1.3rem 2rem' }}
+                style={{ fontSize: '1.6rem', padding: '1.3rem 2rem', marginBottom: '12px' }}
               />
               <select
                 value={newPlayer.grade}
                 onChange={(e) => setNewPlayer({ ...newPlayer, grade: e.target.value })}
                 className="pill-input"
-                style={{ fontSize: '1.6rem', padding: '1.3rem 2rem' }}
+                style={{ fontSize: '1.6rem', padding: '1.3rem 2rem', marginBottom: '12px' }}
               >
                 <option value="">学年を選択</option>
                 <option value="小1">小1</option>
@@ -626,20 +692,30 @@ const Home: React.FC = () => {
                 value={newPlayer.comment}
                 onChange={(e) => setNewPlayer({ ...newPlayer, comment: e.target.value })}
                 className="pill-input"
-                style={{ fontSize: '1.6rem', padding: '1.3rem 2rem' }}
+                style={{ fontSize: '1.6rem', padding: '1.3rem 2rem', marginBottom: '12px' }}
               />
               <input
                 type="file"
                 accept="image/*"
                 onChange={(e) => setNewPlayer({ ...newPlayer, photoFile: e.target.files?.[0] || null })}
                 className="input-file"
-                style={{ fontSize: '1.6rem', padding: '1.5rem 2rem' }}
+                style={{ fontSize: '1.6rem', padding: '1.5rem 2rem', marginBottom: '12px' }}
               />
               {isEditMode && newPlayer.photoUrl && !newPlayer.photoFile && (
-                <div className="text-[var(--color-muted)]" style={{ fontSize: '1.2rem' }}>※写真を変更しない場合は、ファイルを選択しないでください</div>
+                <div className="text-[var(--color-muted)]" style={{ fontSize: '1.2rem', marginBottom: '12px' }}>※写真を変更しない場合は、ファイルを選択しないでください</div>
               )}
             </div>
-            <div className="flex justify-end gap-4 mt-8">
+            <div className="flex justify-end gap-6 mt-8">
+              {isEditMode && (
+                <button
+                  type="button"
+                  onClick={handleDeletePlayer}
+                  className="secondary-button"
+                  style={{ fontSize: '1.6rem', padding: '1.2rem 2rem', marginRight: 'auto' }}
+                >
+                  削除
+                </button>
+              )}
               <button type="button" onClick={() => {
                 setShowAddPlayer(false);
                 setIsEditMode(false);
@@ -647,7 +723,7 @@ const Home: React.FC = () => {
               }} className="secondary-button" style={{ fontSize: '1.6rem', padding: '1.2rem 2rem' }}>
                 キャンセル
               </button>
-              <button type="button" onClick={handleAddPlayer} className="primary-button" style={{ fontSize: '1.6rem', padding: '1.2rem 2rem' }}>
+              <button type="button" onClick={handleAddPlayer} className="primary-button" style={{ fontSize: '1.6rem', padding: '1.2rem 2rem', marginLeft: '16px' }}>
                 {isEditMode ? '更新' : '登録'}
               </button>
             </div>

@@ -1,9 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { collection, getDocs } from "firebase/firestore";
 import { db } from '../firebase';
-import noImageSrc from '../assets/noimage.png';
+const noImageSrc = `${import.meta.env.BASE_URL}noimage.png`;
+
+const resolvePhotoUrl = (photoUrl?: string) => {
+  if (!photoUrl || photoUrl === '/noimage.png') return noImageSrc;
+  return photoUrl;
+};
 
 interface Player {
+  id: string;
   playerCode: string;
   playerName: string;
   grade: string;
@@ -25,6 +31,16 @@ const STAR_COLORS: Record<StarVariant, string> = {
   silver: "#C0C7D1",
   bronze: "#C57B39",
   disabled: "rgba(255,255,255,0.18)",
+};
+
+const RANK_STAR_COLORS = ["#ff7a2a", "#27d978", "#ffd100"];
+
+const pickRankStarColor = (seed: string) => {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i += 1) {
+    hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+  }
+  return RANK_STAR_COLORS[hash % RANK_STAR_COLORS.length];
 };
 
 function StarIcon({
@@ -51,7 +67,7 @@ const Ranking: React.FC = () => {
     const fetchData = async () => {
       const playersRef = collection(db, "players");
       const playersSnap = await getDocs(playersRef);
-      const players = playersSnap.docs.map(doc => ({ ...doc.data() } as Player));
+      const players = playersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Player));
 
       const achievementsRef = collection(db, "achievements");
       const achievementsSnap = await getDocs(achievementsRef);
@@ -83,7 +99,7 @@ const Ranking: React.FC = () => {
       <div className="flex flex-col" style={{ gap: '8px' }}>
         {rankings.map((player, index) => (
           <div
-            key={player.playerCode}
+            key={player.id}
             className="list-item flex items-center justify-between"
             style={{
               borderColor: index === 0 ? 'rgba(245,197,66,0.45)' : index === 1 ? 'rgba(192,199,209,0.4)' : index === 2 ? 'rgba(197,123,57,0.4)' : undefined,
@@ -96,7 +112,7 @@ const Ranking: React.FC = () => {
               <div className="relative flex-shrink-0 flex items-center justify-center" style={{ width: '144px', height: '144px' }}>
                 <svg viewBox="0 0 24 24" style={{
                   position: 'absolute',
-                  fill: index === 0 ? '#F5C542' : index === 1 ? '#C0C7D1' : index === 2 ? '#C57B39' : 'rgba(255,61,252,0.3)',
+                  fill: index === 0 ? '#F5C542' : index === 1 ? '#C0C7D1' : index === 2 ? '#C57B39' : pickRankStarColor(`${player.playerCode}-${index}`),
                   width: '144px',
                   height: '144px',
                 }}>
@@ -114,7 +130,7 @@ const Ranking: React.FC = () => {
               {/* 画像 - 常に同じサイズを確保 */}
               <div className="relative flex-shrink-0 flex items-center justify-center rounded-[var(--radius-md)] border border-[rgba(20,241,255,0.3)]" style={{ width: '144px', height: '144px', overflow: 'hidden' }}>
                 <img
-                  src={player.photoUrl || noImageSrc}
+                  src={resolvePhotoUrl(player.photoUrl)}
                   alt={player.playerName}
                   style={
                     player.photoUrl

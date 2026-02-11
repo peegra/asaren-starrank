@@ -116,11 +116,15 @@ const Mission: React.FC = () => {
         </svg>
         <span>MISSION</span>
       </h1>
-      <div className="flex flex-col gap-5">
-        {missions.map((mission) => {
+      <div className="flex flex-col gap-5" style={{ marginTop: '12px', marginBottom: '12px' }}>
+        {missions.map((mission, index) => {
           const { gold, silver, bronze } = getStarSummary(mission.missionCode);
           return (
-            <div key={mission.missionCode} className="card">
+            <div
+              key={mission.missionCode}
+              className="card"
+              style={{ marginBottom: index === missions.length - 1 ? '0' : '12px' }}
+            >
               <h2 className="section-title mb-1 text-center">{mission.missionName}</h2>
               <p className="text-[var(--color-muted)] mb-4 text-sm text-center">{mission.content}</p>
               <div className="flex flex-col gap-6">
