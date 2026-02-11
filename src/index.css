@@ -4,20 +4,21 @@
 
 /* --- asaren-games 風デザイントークン --- */
 :root {
-  --color-bg: #03000f;
-  --color-surface: rgba(10, 12, 28, 0.72);
-  --color-primary: #ff3dfc;
-  --color-primary-strong: #ff6bff;
-  --color-accent: #14f1ff;
-  --color-accent-strong: #38fdfc;
-  --color-text: #e8faff;
-  --color-muted: #8ab7d4;
+  --color-bg: #fff1d6;
+  --color-surface: rgba(255, 255, 255, 0.92);
+  --color-primary: #ff7a00;
+  --color-primary-strong: #ff9f1c;
+  --color-accent: #1fc8c8;
+  --color-accent-strong: #2ecb70;
+  --color-highlight: #ffd54a;
+  --color-text: #1a1b20;
+  --color-muted: #5f6b6b;
   --radius-lg: 18px;
   --radius-md: 14px;
   --radius-sm: 10px;
-  --shadow-soft: 0 24px 58px rgba(255, 61, 252, 0.2);
-  --shadow-card: 0 20px 50px rgba(4, 12, 45, 0.6);
-  --shadow-focus: 0 0 0 4px rgba(20, 241, 255, 0.45);
+  --shadow-soft: 0 24px 58px rgba(255, 122, 0, 0.22);
+  --shadow-card: 0 18px 45px rgba(37, 42, 62, 0.18);
+  --shadow-focus: 0 0 0 4px rgba(31, 200, 200, 0.35);
 }
 
 *,
@@ -33,10 +34,10 @@ html {
 /* --- アニメーション --- */
 @keyframes pulse-glow {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(20, 241, 255, 0.6), 0 0 40px rgba(20, 241, 255, 0.4), 0 16px 38px rgba(14, 165, 233, 0.42);
+    box-shadow: 0 0 18px rgba(31, 200, 200, 0.55), 0 0 36px rgba(46, 203, 112, 0.35), 0 16px 38px rgba(255, 122, 0, 0.25);
   }
   50% {
-    box-shadow: 0 0 30px rgba(20, 241, 255, 0.9), 0 0 60px rgba(20, 241, 255, 0.6), 0 0 80px rgba(20, 241, 255, 0.3), 0 16px 38px rgba(14, 165, 233, 0.42);
+    box-shadow: 0 0 28px rgba(31, 200, 200, 0.85), 0 0 60px rgba(46, 203, 112, 0.55), 0 0 80px rgba(255, 122, 0, 0.35), 0 16px 38px rgba(46, 203, 112, 0.35);
   }
 }
 
@@ -128,12 +129,15 @@ html {
     margin: 0;
     min-height: 100vh;
     background:
-      radial-gradient(140% 140% at 10% -30%, rgba(147, 51, 234, 0.38), transparent 55%),
-      radial-gradient(120% 120% at 90% 0%, rgba(20, 241, 255, 0.32), transparent 48%),
-      radial-gradient(160% 160% at 50% 110%, rgba(255, 61, 252, 0.24), transparent 60%),
+      radial-gradient(80% 80% at 10% 15%, rgba(255, 90, 0, 0.55), transparent 60%),
+      radial-gradient(90% 90% at 85% 5%, rgba(0, 196, 180, 0.45), transparent 62%),
+      radial-gradient(85% 85% at 40% 95%, rgba(255, 213, 0, 0.4), transparent 60%),
+      radial-gradient(70% 70% at 95% 85%, rgba(255, 66, 165, 0.35), transparent 62%),
+      radial-gradient(60% 60% at 15% 75%, rgba(46, 203, 112, 0.35), transparent 60%),
+      repeating-linear-gradient(135deg, rgba(255, 122, 0, 0.18) 0 18px, rgba(31, 200, 200, 0.16) 18px 36px, rgba(255, 66, 165, 0.16) 36px 54px, rgba(255, 213, 0, 0.16) 54px 72px),
       var(--color-bg);
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
+    background-repeat: repeat;
+    background-size: 420px 420px, 480px 480px, 460px 460px, 520px 520px, 380px 380px, 220px 220px, 100% 100%;
     color: var(--color-text);
     line-height: 1.6;
     font-size: clamp(1.4rem, 4vw, 1.6rem);
@@ -186,23 +190,23 @@ html {
   gap: 0.3rem;
   padding: 0.8rem 1rem;
   border-radius: var(--radius-lg);
-  background: rgba(14, 18, 34, 0.4);
-  border: 1px solid rgba(255, 61, 252, 0.35);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 122, 0, 0.25);
   color: var(--color-text);
   font-weight: 700;
   font-size: clamp(1.2rem, 3.2vw, 1.4rem);
   letter-spacing: 0.01em;
-  box-shadow: 0 12px 26px rgba(255, 61, 252, 0.18);
+  box-shadow: 0 12px 26px rgba(255, 122, 0, 0.14);
   transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   cursor: pointer;
   min-height: 80px;
 }
 
 .tab-button.is-active {
-  background: linear-gradient(135deg, rgba(255, 61, 252, 0.85), rgba(20, 241, 255, 0.85));
+  background: linear-gradient(135deg, rgba(255, 90, 0, 0.98), rgba(0, 196, 180, 0.92));
   color: #fff;
-  box-shadow: 0 22px 44px rgba(255, 61, 252, 0.38);
-  border-color: rgba(20, 241, 255, 0.45);
+  box-shadow: 0 22px 44px rgba(255, 122, 0, 0.35);
+  border-color: rgba(31, 200, 200, 0.4);
 }
 
 .tab-button:hover,
@@ -210,7 +214,7 @@ html {
   transform: translateY(-2px);
   box-shadow: var(--shadow-focus);
   outline: none;
-  border-color: rgba(20, 241, 255, 0.55);
+  border-color: rgba(31, 200, 200, 0.45);
 }
 
 .tab-button:active {
@@ -221,36 +225,36 @@ html {
 .card {
   width: 100%;
   padding: clamp(16px, 5vw, 20px);
-  background: linear-gradient(145deg, rgba(13, 15, 39, 0.9), rgba(17, 8, 34, 0.65));
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(255, 238, 210, 0.9));
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
-  border: 1px solid rgba(255, 61, 252, 0.25);
+  border: 1px solid rgba(255, 122, 0, 0.18);
   backdrop-filter: blur(18px);
 }
 
 .card-title {
   font-size: clamp(2rem, 5vw, 2.5rem);
   text-align: center;
-  text-shadow: 0 0 18px rgba(20, 241, 255, 0.4);
+  text-shadow: 0 0 16px rgba(31, 200, 200, 0.32);
   margin-bottom: 0.8rem;
 }
 
 .section-title {
   font-size: clamp(1.4rem, 3.8vw, 1.6rem);
-  color: var(--color-accent);
+  color: #00b6b0;
   font-weight: 600;
-  text-shadow: 0 0 12px rgba(20, 241, 255, 0.32);
+  text-shadow: 0 0 12px rgba(31, 200, 200, 0.28);
   margin-bottom: 0.6rem;
 }
 
 /* --- フォーム --- */
 .pill-input {
-  border: 1px solid rgba(56, 189, 248, 0.35);
+  border: 1px solid rgba(31, 200, 200, 0.25);
   border-radius: 999px;
   width: 100%;
   padding: 1rem 1.5rem;
   font-size: clamp(1.3rem, 3.5vw, 1.5rem);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.9);
   color: var(--color-text);
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
@@ -262,16 +266,16 @@ html {
 .pill-input:focus {
   outline: none;
   border-color: var(--color-accent-strong);
-  background: rgba(56, 189, 248, 0.12);
-  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.25);
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 0 0 4px rgba(31, 200, 200, 0.2);
 }
 
 .input-file {
   width: 100%;
   padding: 1rem 1.5rem;
   border-radius: var(--radius-md);
-  border: 1px dashed rgba(56, 189, 248, 0.4);
-  background: rgba(56, 189, 248, 0.08);
+  border: 1px dashed rgba(31, 200, 200, 0.35);
+  background: rgba(31, 200, 200, 0.08);
   color: var(--color-muted);
   font-size: clamp(0.95rem, 3vw, 1.1rem);
   cursor: pointer;
@@ -281,7 +285,7 @@ html {
 .input-file:hover,
 .input-file:focus {
   border-color: var(--color-accent);
-  background: rgba(56, 189, 248, 0.14);
+  background: rgba(31, 200, 200, 0.14);
   outline: none;
 }
 
@@ -299,32 +303,32 @@ html {
 
 .primary-button {
   padding: 0.9rem 1.4rem;
-  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-strong));
+  background: linear-gradient(135deg, #ff5a00, #00c4b4);
   color: #fff;
   font-size: clamp(1.3rem, 3.5vw, 1.5rem);
-  box-shadow: 0 16px 38px rgba(14, 165, 233, 0.42);
-  text-shadow: 0 0 14px rgba(20, 241, 255, 0.45);
+  box-shadow: 0 16px 38px rgba(255, 122, 0, 0.25);
+  text-shadow: 0 0 14px rgba(31, 200, 200, 0.35);
 }
 
 .primary-button:hover,
 .primary-button:focus {
-  background: linear-gradient(135deg, var(--color-accent-strong), #0284c7);
+  background: linear-gradient(135deg, #ff8f1f, #2ecb70);
   transform: translateY(-2px);
   outline: none;
 }
 
 .secondary-button {
   padding: 0.9rem 1.4rem;
-  background: rgba(255, 61, 252, 0.16);
+  background: rgba(0, 196, 180, 0.16);
   color: var(--color-text);
-  border: 1px solid rgba(255, 61, 252, 0.35);
+  border: 1px solid rgba(0, 196, 180, 0.4);
   font-size: clamp(1.3rem, 3.5vw, 1.5rem);
-  text-shadow: 0 0 14px rgba(255, 61, 252, 0.35);
+  text-shadow: 0 0 14px rgba(31, 200, 200, 0.25);
 }
 
 .secondary-button:hover,
 .secondary-button:focus {
-  background: rgba(255, 61, 252, 0.28);
+  background: rgba(0, 196, 180, 0.26);
   transform: translateY(-2px);
   outline: none;
   box-shadow: var(--shadow-focus);
@@ -339,19 +343,19 @@ html {
 
 .text-button:hover,
 .text-button:focus {
-  background: rgba(56, 189, 248, 0.16);
+  background: rgba(31, 200, 200, 0.12);
   outline: none;
 }
 
 /* --- リスト・行 --- */
 .list-card {
-  background: linear-gradient(135deg, rgba(11, 15, 32, 0.8), rgba(17, 9, 32, 0.6));
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(255, 246, 214, 0.85));
   border-radius: var(--radius-md);
   padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 122, 0, 0.1);
   backdrop-filter: blur(16px);
 }
 
@@ -360,23 +364,23 @@ html {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  background: linear-gradient(135deg, rgba(9, 12, 28, 0.85), rgba(15, 8, 34, 0.7));
+  background: rgba(255, 255, 255, 0.9);
   border-radius: var(--radius-md);
   padding: 0.8rem 1rem;
-  border: 1px solid rgba(20, 241, 255, 0.2);
+  border: 1px solid rgba(31, 200, 200, 0.2);
   transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
 .list-item:hover {
-  border-color: rgba(20, 241, 255, 0.4);
+  border-color: rgba(31, 200, 200, 0.35);
 }
 
 /* --- 選択チップ（ミッション選択など）--- */
 .chip-button {
   padding: 0.8rem 1rem;
   border-radius: var(--radius-md);
-  border: 2px solid rgba(20, 241, 255, 0.45);
-  background: rgba(6, 10, 28, 0.6);
+  border: 2px solid rgba(31, 200, 200, 0.35);
+  background: rgba(255, 255, 255, 0.95);
   font-weight: 700;
   font-size: clamp(1.2rem, 3.2vw, 1.4rem);
   color: var(--color-text);
@@ -389,14 +393,14 @@ html {
 .chip-button:focus {
   transform: translateY(-2px);
   outline: none;
-  border-color: rgba(20, 241, 255, 0.6);
+  border-color: rgba(31, 200, 200, 0.55);
 }
 
 .chip-button.is-selected {
-  background: linear-gradient(135deg, rgba(255, 61, 252, 0.95), rgba(20, 241, 255, 0.9));
+  background: linear-gradient(135deg, rgba(255, 90, 0, 0.98), rgba(0, 196, 180, 0.92));
   color: #fff;
   border-color: transparent;
-  box-shadow: 0 24px 48px rgba(255, 61, 252, 0.45);
+  box-shadow: 0 24px 48px rgba(255, 122, 0, 0.3);
 }
 
 /* --- スター数バッジ --- */
@@ -408,15 +412,15 @@ html {
   gap: 0.2rem;
   padding: 0.4rem 0.75rem;
   border-radius: var(--radius-md);
-  background: rgba(6, 10, 28, 0.6);
-  border: 1px solid rgba(20, 241, 255, 0.25);
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(31, 200, 200, 0.2);
   min-width: 56px;
 }
 
 .stat-pill .value {
   font-size: clamp(1.2rem, 4vw, 1.5rem);
   font-weight: 700;
-  text-shadow: 0 0 12px rgba(20, 241, 255, 0.35);
+  text-shadow: 0 0 10px rgba(31, 200, 200, 0.3);
 }
 
 .stat-pill .label {
@@ -433,8 +437,8 @@ html {
 .achievement-block {
   padding: 1rem 1.2rem;
   border-radius: var(--radius-md);
-  border: 1px solid rgba(255, 61, 252, 0.2);
-  background: rgba(6, 10, 28, 0.5);
+  border: 1px solid rgba(255, 122, 0, 0.18);
+  background: rgba(255, 255, 255, 0.92);
 }
 
 .achievement-block h3 {
@@ -461,7 +465,7 @@ html {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(3, 0, 15, 0.85);
+  background: rgba(255, 241, 214, 0.82);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -533,9 +537,9 @@ html {
   width: 200px;
   height: 200px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 61, 252, 1), rgba(20, 241, 255, 0.8), transparent);
+  background: radial-gradient(circle, rgba(255, 122, 0, 1), rgba(31, 200, 200, 0.8), transparent);
   animation: celebration-center 0.8s ease-out forwards;
-  box-shadow: 0 0 80px rgba(255, 61, 252, 1), 0 0 160px rgba(20, 241, 255, 0.8), 0 0 240px rgba(255, 61, 252, 0.6);
+  box-shadow: 0 0 80px rgba(255, 122, 0, 1), 0 0 160px rgba(31, 200, 200, 0.8), 0 0 240px rgba(255, 122, 0, 0.6);
 }
 
 .celebration-flash {
@@ -544,7 +548,7 @@ html {
   top: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at center, rgba(255, 61, 252, 0.4), rgba(20, 241, 255, 0.3), transparent 70%);
+  background: radial-gradient(circle at center, rgba(255, 122, 0, 0.3), rgba(31, 200, 200, 0.28), transparent 70%);
   animation: celebration-flash 0.8s ease-out forwards;
 }
 
@@ -572,6 +576,6 @@ html {
 .celebration-sparkle {
   position: absolute;
   animation: celebration-burst 1.5s ease-out forwards;
-  text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fbbf24, 0 0 40px #fbbf24;
-  filter: drop-shadow(0 0 8px #fbbf24);
+  text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #ffd166, 0 0 40px #ffd166;
+  filter: drop-shadow(0 0 8px #ffd166);
 }
