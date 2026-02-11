@@ -21,6 +21,13 @@ function App() {
 
   return (
     <div className="app min-h-screen flex flex-col">
+      <div className="flex items-center justify-center" style={{ marginTop: '12px', marginBottom: '12px' }}>
+        <img
+          src={`${import.meta.env.BASE_URL}stacle.png`}
+          alt="STACLE"
+          style={{ maxWidth: '720px', height: 'auto' }}
+        />
+      </div>
       <div className="tabs">
         <button
           type="button"
