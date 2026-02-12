@@ -102,6 +102,15 @@ const Home: React.FC = () => {
   const goldAudioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
+    const audioElements = [bronzeAudioRef.current, silverAudioRef.current, goldAudioRef.current]
+      .filter(Boolean) as HTMLAudioElement[];
+    audioElements.forEach((audio) => {
+      audio.preload = 'auto';
+      audio.load();
+    });
+  }, []);
+
+  useEffect(() => {
     const fetchData = async () => {
       const playersSnap = await getDocs(collection(db, "players"));
       const playersData = playersSnap.docs.map(doc => ({ ...doc.data() } as Player));
