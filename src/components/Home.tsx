@@ -631,20 +631,20 @@ const Home: React.FC = () => {
                 style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: '8px', height: '100%' }}
               >
                 <div className="flex items-center justify-between" style={{ gap: '12px' }}>
-                  <div className="font-semibold text-sm">{mission.missionName}</div>
+                  <div className="font-semibold text-sm" style={{ fontSize: 'calc(1em + 1px)' }}>{mission.missionName}</div>
                   <div className="flex items-center" style={{ gap: '6px' }}>
                     <div>{status.gold ? <StarIcon variant="gold" size="2.16em" /> : <div style={{ width: '2.16em', height: '2.16em' }}></div>}</div>
                     <div>{status.silver ? <StarIcon variant="silver" size="2.16em" /> : <div style={{ width: '2.16em', height: '2.16em' }}></div>}</div>
                     <div>{status.bronze ? <StarIcon variant="bronze" size="2.16em" /> : <div style={{ width: '2.16em', height: '2.16em' }}></div>}</div>
                   </div>
                 </div>
-                <div className="text-xs opacity-80 line-clamp-3" style={{ paddingLeft: '0.5em' }}>{mission.content}</div>
+                <div className="text-xs opacity-80 line-clamp-3" style={{ paddingLeft: '0.5em', fontSize: 'calc(1em + 1px)' }}>{mission.content}</div>
               </button>
               <button
                 type="button"
                 onClick={(e) => handleClearClick(e, mission)}
                 className="font-bold col-span-1"
-                style={{ ...getClearButtonStyle(status, 'compact'), height: '100%' }}
+                style={{ ...getClearButtonStyle(status, 'compact'), height: '100%', fontSize: 'calc(1em + 1px)' }}
               >
                 {getClearButtonLabel(status)}
               </button>
