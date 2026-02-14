@@ -274,7 +274,7 @@ const Home: React.FC = () => {
     }
     
     if (!selectedPlayer) return;
-    const targetMission = missionOverride ?? selectedMission;
+    const targetMission = missionOverride;
     if (!targetMission) return;
 
     const missionAchievements = achievements.filter(
