@@ -87,7 +87,6 @@ const Home: React.FC = () => {
   const [missions, setMissions] = useState<Mission[]>([]);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
-  const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
   const [showAddPlayer, setShowAddPlayer] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [newPlayer, setNewPlayer] = useState({ playerName: '', grade: '', comment: '', photoFile: null as File | null, photoUrl: '' });
@@ -133,7 +132,6 @@ const Home: React.FC = () => {
       const missionsData = missionsSnap.docs.map(doc => ({ ...doc.data() } as Mission));
       const sortedMissions = [...missionsData].sort((a, b) => a.missionCode.localeCompare(b.missionCode));
       setMissions(sortedMissions);
-      if (sortedMissions.length > 0) setSelectedMission(sortedMissions[0]);
 
       const achievementsSnap = await getDocs(collection(db, "achievements"));
       const achievementsData = achievementsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Achievement));
@@ -607,48 +605,7 @@ const Home: React.FC = () => {
         </div>
       )}
 
-      {selectedMission && selectedPlayer && (
-        <div className="card" style={{ marginTop: '12px' }}>
-          <h1 className="card-title flex items-center justify-center gap-3">
-            <span>MISSIONクリアでSTARをゲットしよう！</span>
-          </h1>
-          {/* 一番上：星3つ（左）とタイトル（右）を横並び */}
-          <div className="flex items-center justify-center gap-6 mb-4">
-            <div className="flex gap-3 items-center">
-              <StarIcon
-                variant={getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode).gold ? 'gold' : 'disabled'}
-                size="3em"
-              />
-              <StarIcon
-                variant={getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode).silver ? 'silver' : 'disabled'}
-                size="3em"
-              />
-              <StarIcon
-                variant={getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode).bronze ? 'bronze' : 'disabled'}
-                size="3em"
-              />
-            </div>
-            <h4 style={{ fontSize: '1.8em', margin: 0, lineHeight: 1, display: 'flex', alignItems: 'center', color: 'var(--color-accent)', fontWeight: 600 }}>{selectedMission.missionName}</h4>
-          </div>
-          
-          {/* 真ん中：説明 */}
-          <div className="flex justify-center mb-6">
-            <p className="text-[var(--color-muted)] text-center" style={{ fontSize: '1.5em' }}>{selectedMission.content}</p>
-          </div>
-          
-          {/* 下：ボタン */}
-          <div className="flex justify-center">
-            <button
-              type="button"
-              onClick={handleClearClick}
-              className="font-bold"
-              style={getClearButtonStyle(getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode), 'large')}
-            >
-              {getClearButtonLabel(getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode))}
-            </button>
-          </div>
-        </div>
-      )}
+
 
       <h1 className="card-title flex items-center justify-center gap-3">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
@@ -670,8 +627,7 @@ const Home: React.FC = () => {
             >
               <button
                 type="button"
-                onClick={() => setSelectedMission(mission)}
-                className={`chip-button col-span-2 ${selectedMission?.missionCode === mission.missionCode ? 'is-selected' : ''}`}
+                className="chip-button col-span-2"
                 style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: '8px', height: '100%' }}
               >
                 <div className="flex items-center justify-between" style={{ gap: '12px' }}>

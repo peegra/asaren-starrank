@@ -117,7 +117,7 @@ const Mission: React.FC = () => {
         <span>MISSION</span>
       </h1>
       <div className="flex flex-col gap-5" style={{ marginTop: '12px', marginBottom: '12px' }}>
-        {missions.map((mission, index) => {
+        {[...missions].sort((a, b) => a.missionCode.localeCompare(b.missionCode)).map((mission, index) => {
           const { gold, silver, bronze } = getStarSummary(mission.missionCode);
           return (
             <div
@@ -125,7 +125,7 @@ const Mission: React.FC = () => {
               className="card"
               style={{ marginBottom: index === missions.length - 1 ? '0' : '12px' }}
             >
-              <h2 className="section-title mb-1 text-center">{mission.missionName}</h2>
+              <h2 className="section-title mb-1 text-center" style={{ fontSize: '1.8rem', color: '#000000' }}>{mission.missionName}</h2>
               <p className="text-[var(--color-muted)] mb-4 text-sm text-center">{mission.content}</p>
               <div className="flex flex-col gap-6">
                 {/* GOLD */}
@@ -142,8 +142,7 @@ const Mission: React.FC = () => {
                   }}>
                     {gold.map((ach) => (
                       <div key={ach.id}>
-                        {getPlayerName(ach.playerCode)}<br />
-                        {formatAchievedAt(ach.achievedAt)}
+                        {getPlayerName(ach.playerCode)}（{formatAchievedAt(ach.achievedAt)}）
                       </div>
                     ))}
                   </div>
@@ -163,8 +162,7 @@ const Mission: React.FC = () => {
                   }}>
                     {silver.map((ach) => (
                       <div key={ach.id}>
-                        {getPlayerName(ach.playerCode)}<br />
-                        {formatAchievedAt(ach.achievedAt)}
+                        {getPlayerName(ach.playerCode)}（{formatAchievedAt(ach.achievedAt)}）
                       </div>
                     ))}
                   </div>
@@ -184,8 +182,7 @@ const Mission: React.FC = () => {
                   }}>
                     {bronze.map((ach) => (
                       <div key={ach.id}>
-                        {getPlayerName(ach.playerCode)}<br />
-                        {formatAchievedAt(ach.achievedAt)}
+                        {getPlayerName(ach.playerCode)}（{formatAchievedAt(ach.achievedAt)}）
                       </div>
                     ))}
                   </div>

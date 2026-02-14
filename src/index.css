@@ -401,12 +401,7 @@ html {
   border-color: rgba(59, 109, 224, 0.55);
 }
 
-.chip-button.is-selected {
-  background: rgba(255, 209, 0, 0.9);
-  color: var(--color-text);
-  border-color: rgba(255, 45, 26, 0.5);
-  box-shadow: 0 24px 48px rgba(255, 45, 26, 0.38);
-}
+
 
 /* --- スター数バッジ --- */
 .stat-pill {
