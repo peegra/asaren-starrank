@@ -26,6 +26,12 @@ interface Mission {
   content: string;
 }
 
+type MissionStatus = {
+  bronze: boolean;
+  silver: boolean;
+  gold: boolean;
+};
+
 interface Achievement {
   id: string;
   playerCode: string;
@@ -125,8 +131,9 @@ const Home: React.FC = () => {
 
       const missionsSnap = await getDocs(collection(db, "missions"));
       const missionsData = missionsSnap.docs.map(doc => ({ ...doc.data() } as Mission));
-      setMissions(missionsData);
-      if (missionsData.length > 0) setSelectedMission(missionsData[0]);
+      const sortedMissions = [...missionsData].sort((a, b) => a.missionCode.localeCompare(b.missionCode));
+      setMissions(sortedMissions);
+      if (sortedMissions.length > 0) setSelectedMission(sortedMissions[0]);
 
       const achievementsSnap = await getDocs(collection(db, "achievements"));
       const achievementsData = achievementsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Achievement));
@@ -143,7 +150,7 @@ const Home: React.FC = () => {
     return { gold, silver, bronze };
   };
 
-  const getMissionStatus = (playerCode: string, missionCode: string) => {
+  const getMissionStatus = (playerCode: string, missionCode: string): MissionStatus => {
     const missionAchievements = achievements.filter(a => a.playerCode === playerCode && a.missionCode === missionCode);
     return {
       bronze: missionAchievements.some(a => a.starType === 'bronze'),
@@ -152,7 +159,92 @@ const Home: React.FC = () => {
     };
   };
 
-  const handleClearClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  const getClearButtonLabel = (status: MissionStatus) => {
+    if (status.bronze && status.silver && status.gold) {
+      return 'ゲットしたスターをリセット';
+    }
+    if (status.silver && !status.gold) {
+      return 'ゴールドクリア！';
+    }
+    if (status.bronze && !status.silver) {
+      return 'シルバークリア！';
+    }
+    return 'ブロンズクリア！';
+  };
+
+  const getClearButtonStyle = (status: MissionStatus, size: 'large' | 'compact' = 'large') => {
+    const sizeStyle = size === 'large'
+      ? {
+          padding: '1.2rem 2rem',
+          fontSize: '1.8rem',
+          ['--pulse-scale' as any]: 1,
+          transform: 'scale(var(--pulse-scale, 1))',
+          transformOrigin: 'center',
+        }
+      : {
+          padding: '1.2rem 2rem',
+          fontSize: '1.8rem',
+          width: '100%',
+          ['--pulse-scale' as any]: 0.9,
+          transform: 'scale(var(--pulse-scale, 1))',
+          transformOrigin: 'center',
+          justifySelf: 'center' as any,
+          alignSelf: 'center' as any,
+        };
+
+    if (status.bronze && status.silver && status.gold) {
+      return {
+        ...sizeStyle,
+        backgroundColor: '#6b7280',
+        color: 'white',
+        border: 'none',
+        borderRadius: '0.5rem',
+        cursor: 'pointer',
+        transition: 'transform 0.2s, opacity 0.2s',
+        WebkitTapHighlightColor: 'transparent' as any,
+        touchAction: 'manipulation' as any,
+      };
+    }
+    if (status.silver && !status.gold) {
+      return {
+        ...sizeStyle,
+        backgroundColor: '#fbbf24',
+        color: '#78350f',
+        border: 'none',
+        borderRadius: '0.5rem',
+        cursor: 'pointer',
+        animation: 'pulse-glow-gold 2s ease-in-out infinite',
+        WebkitTapHighlightColor: 'transparent' as any,
+        touchAction: 'manipulation' as any,
+      };
+    }
+    if (status.bronze && !status.silver) {
+      return {
+        ...sizeStyle,
+        backgroundColor: '#d1d5db',
+        color: '#1f2937',
+        border: 'none',
+        borderRadius: '0.5rem',
+        cursor: 'pointer',
+        animation: 'pulse-glow-silver 2s ease-in-out infinite',
+        WebkitTapHighlightColor: 'transparent' as any,
+        touchAction: 'manipulation' as any,
+      };
+    }
+    return {
+      ...sizeStyle,
+      backgroundColor: '#b45309',
+      color: 'white',
+      border: 'none',
+      borderRadius: '0.5rem',
+      cursor: 'pointer',
+      animation: 'pulse-glow-bronze 2s ease-in-out infinite',
+      WebkitTapHighlightColor: 'transparent' as any,
+      touchAction: 'manipulation' as any,
+    };
+  };
+
+  const handleClearClick = async (e: React.MouseEvent<HTMLButtonElement>, missionOverride?: Mission | null) => {
     e.preventDefault();
     e.stopPropagation();
     
@@ -183,13 +275,15 @@ const Home: React.FC = () => {
       }
     }
     
-    if (!selectedPlayer || !selectedMission) return;
+    if (!selectedPlayer) return;
+    const targetMission = missionOverride ?? selectedMission;
+    if (!targetMission) return;
 
     const missionAchievements = achievements.filter(
-      a => a.playerCode === selectedPlayer.playerCode && a.missionCode === selectedMission.missionCode
+      a => a.playerCode === selectedPlayer.playerCode && a.missionCode === targetMission.missionCode
     );
 
-    const status = getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode);
+    const status = getMissionStatus(selectedPlayer.playerCode, targetMission.missionCode);
 
     // 全て獲得している場合はリセット
     if (status.bronze && status.silver && status.gold) {
@@ -218,7 +312,7 @@ const Home: React.FC = () => {
 
     const newAch = {
       playerCode: selectedPlayer.playerCode,
-      missionCode: selectedMission.missionCode,
+      missionCode: targetMission.missionCode,
       starType: nextStarType,
       achievedAt: new Date()
     };
@@ -548,79 +642,9 @@ const Home: React.FC = () => {
               type="button"
               onClick={handleClearClick}
               className="font-bold"
-              style={(() => {
-                const status = getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode);
-                if (status.bronze && status.silver && status.gold) {
-                  // リセットボタン: グレー、光らない
-                  return {
-                    padding: '1.2rem 2rem',
-                    fontSize: '1.8rem',
-                    backgroundColor: '#6b7280',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '0.5rem',
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s, opacity 0.2s',
-                    WebkitTapHighlightColor: 'transparent' as any,
-                    touchAction: 'manipulation' as any,
-                  };
-                } else if (status.silver && !status.gold) {
-                  // ゴールドクリア: ゴールド色
-                  return {
-                    padding: '1.2rem 2rem',
-                    fontSize: '1.8rem',
-                    backgroundColor: '#fbbf24',
-                    color: '#78350f',
-                    border: 'none',
-                    borderRadius: '0.5rem',
-                    cursor: 'pointer',
-                    animation: 'pulse-glow-gold 2s ease-in-out infinite',
-                    WebkitTapHighlightColor: 'transparent' as any,
-                    touchAction: 'manipulation' as any,
-                  };
-                } else if (status.bronze && !status.silver) {
-                  // シルバークリア: シルバー色
-                  return {
-                    padding: '1.2rem 2rem',
-                    fontSize: '1.8rem',
-                    backgroundColor: '#d1d5db',
-                    color: '#1f2937',
-                    border: 'none',
-                    borderRadius: '0.5rem',
-                    cursor: 'pointer',
-                    animation: 'pulse-glow-silver 2s ease-in-out infinite',
-                    WebkitTapHighlightColor: 'transparent' as any,
-                    touchAction: 'manipulation' as any,
-                  };
-                } else {
-                  // ブロンズクリア: ブロンズ色
-                  return {
-                    padding: '1.2rem 2rem',
-                    fontSize: '1.8rem',
-                    backgroundColor: '#b45309',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '0.5rem',
-                    cursor: 'pointer',
-                    animation: 'pulse-glow-bronze 2s ease-in-out infinite',
-                    WebkitTapHighlightColor: 'transparent' as any,
-                    touchAction: 'manipulation' as any,
-                  };
-                }
-              })()}
+              style={getClearButtonStyle(getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode), 'large')}
             >
-              {(() => {
-                const status = getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode);
-                if (status.bronze && status.silver && status.gold) {
-                  return 'ゲットしたスターをリセット';
-                } else if (status.silver && !status.gold) {
-                  return 'ゴールドクリア！';
-                } else if (status.bronze && !status.silver) {
-                  return 'シルバークリア！';
-                } else {
-                  return 'ブロンズクリア！';
-                }
-              })()}
+              {getClearButtonLabel(getMissionStatus(selectedPlayer.playerCode, selectedMission.missionCode))}
             </button>
           </div>
         </div>
@@ -633,33 +657,42 @@ const Home: React.FC = () => {
         <span>MISSION</span>
       </h1>
 
-      <div className="grid grid-cols-3 mb-4" style={{ gap: '8px' }}>
+      <div className="flex flex-col mb-4" style={{ gap: '8px' }}>
         {missions.map((mission) => {
-          const status = selectedPlayer ? getMissionStatus(selectedPlayer.playerCode, mission.missionCode) : null;
+          const status = selectedPlayer
+            ? getMissionStatus(selectedPlayer.playerCode, mission.missionCode)
+            : { bronze: false, silver: false, gold: false };
           return (
-            <button
+            <div
               key={mission.missionCode}
-              type="button"
-              onClick={() => setSelectedMission(mission)}
-              className={`chip-button ${selectedMission?.missionCode === mission.missionCode ? 'is-selected' : ''}`}
-              style={{ height: '180px', display: 'flex', flexDirection: 'row' }}
+              className="grid grid-cols-3"
+              style={{ gap: '8px', alignItems: 'stretch' }}
             >
-              {/* 左側：星を縦並びで表示（ゴールド、シルバー、ブロンズ順） */}
-              <div className="flex flex-col gap-1" style={{ width: '64px', justifyContent: 'center', flexShrink: 0 }}>
-                {status && (
-                  <>
-                    <div>{status.gold ? <StarIcon variant="gold" size="1.8em" /> : <div style={{ width: '1.8em', height: '1.8em' }}></div>}</div>
-                    <div>{status.silver ? <StarIcon variant="silver" size="1.8em" /> : <div style={{ width: '1.8em', height: '1.8em' }}></div>}</div>
-                    <div>{status.bronze ? <StarIcon variant="bronze" size="1.8em" /> : <div style={{ width: '1.8em', height: '1.8em' }}></div>}</div>
-                  </>
-                )}
-              </div>
-              {/* 右側：タイトルと説明 */}
-              <div className="flex flex-col gap-1 flex-1 overflow-hidden pl-2">
-                <div className="font-semibold text-sm">{mission.missionName}</div>
-                <div className="text-xs opacity-80 line-clamp-3">{mission.content}</div>
-              </div>
-            </button>
+              <button
+                type="button"
+                onClick={() => setSelectedMission(mission)}
+                className={`chip-button col-span-2 ${selectedMission?.missionCode === mission.missionCode ? 'is-selected' : ''}`}
+                style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: '8px', height: '100%' }}
+              >
+                <div className="flex items-center justify-between" style={{ gap: '12px' }}>
+                  <div className="font-semibold text-sm">{mission.missionName}</div>
+                  <div className="flex items-center" style={{ gap: '6px' }}>
+                    <div>{status.gold ? <StarIcon variant="gold" size="2.16em" /> : <div style={{ width: '2.16em', height: '2.16em' }}></div>}</div>
+                    <div>{status.silver ? <StarIcon variant="silver" size="2.16em" /> : <div style={{ width: '2.16em', height: '2.16em' }}></div>}</div>
+                    <div>{status.bronze ? <StarIcon variant="bronze" size="2.16em" /> : <div style={{ width: '2.16em', height: '2.16em' }}></div>}</div>
+                  </div>
+                </div>
+                <div className="text-xs opacity-80 line-clamp-3" style={{ paddingLeft: '0.5em' }}>{mission.content}</div>
+              </button>
+              <button
+                type="button"
+                onClick={(e) => handleClearClick(e, mission)}
+                className="font-bold col-span-1"
+                style={{ ...getClearButtonStyle(status, 'compact'), height: '100%' }}
+              >
+                {getClearButtonLabel(status)}
+              </button>
+            </div>
           );
         })}
       </div>
