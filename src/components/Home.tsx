@@ -88,8 +88,10 @@ const Home: React.FC = () => {
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [showAddPlayer, setShowAddPlayer] = useState(false);
+  const [showAddMission, setShowAddMission] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [newPlayer, setNewPlayer] = useState({ playerName: '', grade: '', comment: '', photoFile: null as File | null, photoUrl: '' });
+  const [newMission, setNewMission] = useState({ missionName: '', content: '' });
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const [showFireworks, setShowFireworks] = useState(false);
 
@@ -447,6 +449,38 @@ const Home: React.FC = () => {
     }
   };
 
+  const getNextMissionCode = () => {
+    const maxCodeNumber = missions.reduce((max, mission) => {
+      const match = mission.missionCode.match(/^M(\d+)$/i);
+      if (!match) return max;
+      return Math.max(max, Number(match[1]));
+    }, 0);
+    return `M${String(maxCodeNumber + 1).padStart(3, '0')}`;
+  };
+
+  const handleAddMission = async () => {
+    const missionCode = getNextMissionCode();
+    const missionName = newMission.missionName.trim();
+    const content = newMission.content.trim();
+
+    if (!missionName || !content) {
+      alert('MISSION名・内容を入力してください。');
+      return;
+    }
+
+    try {
+      const missionToAdd = { missionCode, missionName, content };
+      await addDoc(collection(db, "missions"), missionToAdd);
+      const sortedMissions = [...missions, missionToAdd].sort((a, b) => a.missionCode.localeCompare(b.missionCode));
+      setMissions(sortedMissions);
+      setNewMission({ missionName: '', content: '' });
+      setShowAddMission(false);
+    } catch (error) {
+      console.error('MISSION追加エラー:', error);
+      alert('MISSIONの追加に失敗しました。もう一度お試しください。');
+    }
+  };
+
   const { gold, silver, bronze } = selectedPlayer ? getStarCounts(selectedPlayer.playerCode) : { gold: 0, silver: 0, bronze: 0 };
 
   const handleDeletePlayer = async () => {
@@ -607,12 +641,26 @@ const Home: React.FC = () => {
 
 
 
-      <h1 className="card-title flex items-center justify-center gap-3">
+      <div className="flex items-center justify-center relative">
+        <h1 className="card-title flex items-center justify-center gap-3">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 2l2.9 6 6.6.6-5 4.3 1.5 6.5L12 16l-6 3.4L7.5 13 2.5 8.6l6.6-.6L12 2z"/>
         </svg>
         <span>MISSION</span>
-      </h1>
+        </h1>
+        <button
+          type="button"
+          onClick={() => setShowAddMission(true)}
+          className="primary-button w-12 h-12 p-0 flex items-center justify-center"
+          style={{ borderRadius: '9999px', position: 'absolute', right: 0 }}
+          aria-label="MISSION追加"
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 5v14" />
+            <path d="M5 12h14" />
+          </svg>
+        </button>
+      </div>
 
       <div className="flex flex-col mb-4" style={{ gap: '8px' }}>
         {missions.map((mission) => {
@@ -723,6 +771,55 @@ const Home: React.FC = () => {
               </button>
               <button type="button" onClick={handleAddPlayer} className="primary-button" style={{ fontSize: '1.6rem', padding: '1.2rem 2rem', marginLeft: '16px' }}>
                 {isEditMode ? '更新' : '登録'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showAddMission && (
+        <div className="modal-overlay">
+          <div className="card modal-card" style={{ padding: '2.5rem' }}>
+            <h3 className="card-title" style={{ fontSize: '2.5rem', marginBottom: '2rem' }}>MISSION追加</h3>
+            <div className="flex flex-col gap-6">
+              <div className="pill-input" style={{ fontSize: '1.6rem', padding: '1.3rem 2rem', marginBottom: '12px', background: 'rgba(255, 255, 255, 0.7)' }}>
+                次のMISSIONコード：{getNextMissionCode()}
+              </div>
+              <input
+                type="text"
+                placeholder="MISSION名"
+                value={newMission.missionName}
+                onChange={(e) => setNewMission({ ...newMission, missionName: e.target.value })}
+                className="pill-input"
+                style={{ fontSize: '1.6rem', padding: '1.3rem 2rem', marginBottom: '12px' }}
+              />
+              <textarea
+                placeholder="内容"
+                value={newMission.content}
+                onChange={(e) => setNewMission({ ...newMission, content: e.target.value })}
+                className="pill-input"
+                style={{ fontSize: '1.6rem', padding: '1.3rem 2rem', marginBottom: '12px', minHeight: '140px', resize: 'vertical' }}
+              />
+            </div>
+            <div className="flex justify-end gap-6 mt-8">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAddMission(false);
+                  setNewMission({ missionName: '', content: '' });
+                }}
+                className="secondary-button"
+                style={{ fontSize: '1.6rem', padding: '1.2rem 2rem' }}
+              >
+                キャンセル
+              </button>
+              <button
+                type="button"
+                onClick={handleAddMission}
+                className="primary-button"
+                style={{ fontSize: '1.6rem', padding: '1.2rem 2rem', marginLeft: '16px' }}
+              >
+                追加
               </button>
             </div>
           </div>
