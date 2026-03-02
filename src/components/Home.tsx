@@ -161,15 +161,15 @@ const Home: React.FC = () => {
 
   const getClearButtonLabel = (status: MissionStatus) => {
     if (status.bronze && status.silver && status.gold) {
-      return 'ゲットしたスターをリセット';
+      return 'スターを\nリセット';
     }
     if (status.silver && !status.gold) {
-      return 'ゴールドクリア！';
+      return 'ゴールド\nクリア！';
     }
     if (status.bronze && !status.silver) {
-      return 'シルバークリア！';
+      return 'シルバー\nクリア！';
     }
-    return 'ブロンズクリア！';
+    return 'ブロンズ\nクリア！';
   };
 
   const getClearButtonStyle = (status: MissionStatus, size: 'large' | 'compact' = 'large') => {
@@ -182,10 +182,11 @@ const Home: React.FC = () => {
           transformOrigin: 'center',
         }
       : {
-          padding: '1.2rem 2rem',
-          fontSize: '1.8rem',
+          padding: '0.9rem 1.3rem',
+          fontSize: '1.5rem',
           width: '100%',
-          ['--pulse-scale' as any]: 0.9,
+          minHeight: '3.4rem',
+          ['--pulse-scale' as any]: 0.92,
           transform: 'scale(var(--pulse-scale, 1))',
           transformOrigin: 'center',
           justifySelf: 'center' as any,
@@ -195,12 +196,14 @@ const Home: React.FC = () => {
     if (status.bronze && status.silver && status.gold) {
       return {
         ...sizeStyle,
-        backgroundColor: '#6b7280',
-        color: 'white',
+        backgroundColor: '#fbbf24', // gold
+        color: '#78350f',
         border: 'none',
         borderRadius: '0.5rem',
         cursor: 'pointer',
         transition: 'transform 0.2s, opacity 0.2s',
+        whiteSpace: 'pre-line',
+        animation: 'pulse-glow-gold 2s ease-in-out infinite',
         WebkitTapHighlightColor: 'transparent' as any,
         touchAction: 'manipulation' as any,
       };
@@ -208,12 +211,13 @@ const Home: React.FC = () => {
     if (status.silver && !status.gold) {
       return {
         ...sizeStyle,
-        backgroundColor: '#fbbf24',
-        color: '#78350f',
+        backgroundColor: '#d1d5db', // silver tone for gold clear
+        color: '#1f2937',
         border: 'none',
         borderRadius: '0.5rem',
         cursor: 'pointer',
-        animation: 'pulse-glow-gold 2s ease-in-out infinite',
+        animation: 'pulse-glow-silver 2s ease-in-out infinite',
+        whiteSpace: 'pre-line',
         WebkitTapHighlightColor: 'transparent' as any,
         touchAction: 'manipulation' as any,
       };
@@ -221,24 +225,24 @@ const Home: React.FC = () => {
     if (status.bronze && !status.silver) {
       return {
         ...sizeStyle,
-        backgroundColor: '#d1d5db',
+        backgroundColor: '#6b7280', // gray, no glow
         color: '#1f2937',
         border: 'none',
         borderRadius: '0.5rem',
         cursor: 'pointer',
-        animation: 'pulse-glow-silver 2s ease-in-out infinite',
+        whiteSpace: 'pre-line',
         WebkitTapHighlightColor: 'transparent' as any,
         touchAction: 'manipulation' as any,
       };
     }
     return {
       ...sizeStyle,
-      backgroundColor: '#b45309',
-      color: 'white',
+      backgroundColor: '#6b7280', // gray, no bronze yet
+      color: '#1f2937',
       border: 'none',
       borderRadius: '0.5rem',
       cursor: 'pointer',
-      animation: 'pulse-glow-bronze 2s ease-in-out infinite',
+      whiteSpace: 'pre-line',
       WebkitTapHighlightColor: 'transparent' as any,
       touchAction: 'manipulation' as any,
     };
@@ -670,23 +674,23 @@ const Home: React.FC = () => {
           return (
             <div
               key={mission.missionCode}
-              className="grid grid-cols-3"
+              className="grid grid-cols-5"
               style={{ gap: '8px', alignItems: 'stretch' }}
             >
               <button
                 type="button"
-                className="chip-button col-span-2"
+                className="chip-button col-span-4"
                 style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: '8px', height: '100%' }}
               >
                 <div className="flex items-center justify-between" style={{ gap: '12px' }}>
-                  <div className="font-semibold text-sm" style={{ fontSize: 'calc(1em + 1px)' }}>{mission.missionName}</div>
-                  <div className="flex items-center" style={{ gap: '6px' }}>
+                  <div className="font-semibold text-sm" style={{ fontSize: 'calc(1em + 5px)' }}>{mission.missionName}</div>
+                  <div className="flex items-center" style={{ gap: '15px' }}>
                     <div>{status.gold ? <StarIcon variant="gold" size="2.16em" /> : <div style={{ width: '2.16em', height: '2.16em' }}></div>}</div>
                     <div>{status.silver ? <StarIcon variant="silver" size="2.16em" /> : <div style={{ width: '2.16em', height: '2.16em' }}></div>}</div>
                     <div>{status.bronze ? <StarIcon variant="bronze" size="2.16em" /> : <div style={{ width: '2.16em', height: '2.16em' }}></div>}</div>
                   </div>
                 </div>
-                <div className="text-xs opacity-80 line-clamp-3" style={{ paddingLeft: '0.5em', fontSize: 'calc(1em + 1px)' }}>{mission.content}</div>
+                <div className="text-xs opacity-80 line-clamp-3" style={{ paddingLeft: '0.5em', fontSize: 'calc(1em + 5px)' }}>{mission.content}</div>
               </button>
               <button
                 type="button"
