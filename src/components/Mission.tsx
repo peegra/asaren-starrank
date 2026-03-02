@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, updateDoc, doc } from "firebase/firestore";
 import { db } from '../firebase';
 
 interface Mission {
@@ -62,6 +62,9 @@ const Mission: React.FC = () => {
   const [missions, setMissions] = useState<Mission[]>([]);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
+  const [showEditMission, setShowEditMission] = useState(false);
+  const [missionToEdit, setMissionToEdit] = useState<Mission | null>(null);
+  const [editMission, setEditMission] = useState({ missionName: '', content: '' });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -108,7 +111,41 @@ const Mission: React.FC = () => {
     return { gold, silver, bronze };
   };
 
+  const openEditMission = (mission: Mission) => {
+    setMissionToEdit(mission);
+    setEditMission({ missionName: mission.missionName, content: mission.content });
+    setShowEditMission(true);
+  };
+
+  const handleUpdateMission = async () => {
+    if (!missionToEdit) return;
+    const missionName = editMission.missionName.trim();
+    const content = editMission.content.trim();
+    if (!missionName || !content) {
+      alert('MISSION名・内容を入力してください。');
+      return;
+    }
+    try {
+      const missionsRef = collection(db, "missions");
+      const missionsSnap = await getDocs(missionsRef);
+      const target = missionsSnap.docs.find(d => d.data().missionCode === missionToEdit.missionCode);
+      if (!target) throw new Error('対象のMISSIONが見つかりません');
+      await updateDoc(doc(db, "missions", target.id), { missionName, content });
+      const updated = missions.map(m =>
+        m.missionCode === missionToEdit.missionCode ? { ...m, missionName, content } : m
+      );
+      setMissions(updated);
+      setShowEditMission(false);
+      setMissionToEdit(null);
+      setEditMission({ missionName: '', content: '' });
+    } catch (error: any) {
+      console.error('MISSION更新エラー:', error);
+      alert(`MISSIONの更新に失敗しました: ${error?.message ?? error}`);
+    }
+  };
+
   return (
+    <>
     <div className="flex flex-col gap-5 flex-1">
       <h1 className="card-title flex items-center justify-center gap-3">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
@@ -123,8 +160,25 @@ const Mission: React.FC = () => {
             <div
               key={mission.missionCode}
               className="card"
-              style={{ marginBottom: index === missions.length - 1 ? '0' : '12px' }}
+              style={{ marginBottom: index === missions.length - 1 ? '0' : '12px', position: 'relative' }}
             >
+              <button
+                type="button"
+                onClick={() => openEditMission(mission)}
+                className="secondary-button w-12 h-12 p-0 flex items-center justify-center"
+                style={{
+                  position: 'absolute',
+                  top: '12px',
+                  right: '12px',
+                  borderRadius: '9999px',
+                }}
+                aria-label={`${mission.missionName} を編集`}
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
+                </svg>
+              </button>
               <h2 className="section-title mb-1 text-center" style={{ fontSize: '1.8rem', color: '#000000' }}>{mission.missionName}</h2>
               <p className="text-[var(--color-muted)] mb-4 text-sm text-center">{mission.content}</p>
               <div className="flex flex-col gap-6">
@@ -193,6 +247,57 @@ const Mission: React.FC = () => {
         })}
       </div>
     </div>
+
+      {showEditMission && missionToEdit && (
+        <div className="modal-overlay">
+          <div className="card modal-card" style={{ padding: '2.5rem' }}>
+            <h3 className="card-title" style={{ fontSize: '2.5rem', marginBottom: '2rem' }}>MISSION編集</h3>
+            <div className="flex flex-col gap-6">
+              <div className="pill-input" style={{ fontSize: '1.6rem', padding: '1.3rem 2rem', marginBottom: '12px', background: 'rgba(255, 255, 255, 0.7)' }}>
+                MISSIONコード：{missionToEdit.missionCode}
+              </div>
+              <input
+                type="text"
+                placeholder="MISSION名"
+                value={editMission.missionName}
+                onChange={(e) => setEditMission({ ...editMission, missionName: e.target.value })}
+                className="pill-input"
+                style={{ fontSize: '1.6rem', padding: '1.3rem 2rem', marginBottom: '12px' }}
+              />
+              <textarea
+                placeholder="内容"
+                value={editMission.content}
+                onChange={(e) => setEditMission({ ...editMission, content: e.target.value })}
+                className="pill-input"
+                style={{ fontSize: '1.6rem', padding: '1.3rem 2rem', marginBottom: '12px', minHeight: '140px', resize: 'vertical' }}
+              />
+            </div>
+            <div className="flex justify-end gap-6 mt-8">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowEditMission(false);
+                  setMissionToEdit(null);
+                  setEditMission({ missionName: '', content: '' });
+                }}
+                className="secondary-button"
+                style={{ fontSize: '1.6rem', padding: '1.2rem 2rem' }}
+              >
+                キャンセル
+              </button>
+              <button
+                type="button"
+                onClick={handleUpdateMission}
+                className="primary-button"
+                style={{ fontSize: '1.6rem', padding: '1.2rem 2rem', marginLeft: '16px' }}
+              >
+                更新
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
