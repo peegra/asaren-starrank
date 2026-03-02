@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc, setDoc } from "firebase/firestore";
 import { db } from '../firebase';
 const noImageSrc = `${import.meta.env.BASE_URL}noimage.png`;
 
@@ -48,6 +48,9 @@ const STAR_COLORS: Record<StarVariant, string> = {
   bronze: "#C57B39",
   disabled: "rgba(255,255,255,0.18)",
 };
+
+const achievementDocId = (playerCode: string, missionCode: string, starType: string) =>
+  `${playerCode}_${missionCode}_${starType}`;
 
 function StarIcon({
   variant = "gold",
@@ -322,8 +325,11 @@ const Home: React.FC = () => {
     };
     
     try {
-      const docRef = await addDoc(collection(db, "achievements"), newAch);
-      setAchievements([...achievements, { id: docRef.id, ...newAch }]);
+      const achId = achievementDocId(selectedPlayer.playerCode, targetMission.missionCode, nextStarType);
+      await setDoc(doc(db, "achievements", achId), newAch);
+      // 重複を防ぐため、同じIDがあれば置き換え、なければ追加
+      const filtered = achievements.filter(a => a.id !== achId);
+      setAchievements([...filtered, { id: achId, ...newAch }]);
       
       // 花火演出を表示
       setShowFireworks(true);
