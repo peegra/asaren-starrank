@@ -214,7 +214,7 @@ const Home: React.FC = () => {
     if (status.silver && !status.gold) {
       return {
         ...sizeStyle,
-        backgroundColor: '#d1d5db', // silver tone for gold clear
+        backgroundColor: '#d1d5db', // silver tone (gold 未取得)
         color: '#1f2937',
         border: 'none',
         borderRadius: '0.5rem',
@@ -228,11 +228,12 @@ const Home: React.FC = () => {
     if (status.bronze && !status.silver) {
       return {
         ...sizeStyle,
-        backgroundColor: '#6b7280', // gray, no glow
-        color: '#1f2937',
+        backgroundColor: '#b45309', // bronze tone (bronzeだけ取得)
+        color: 'white',
         border: 'none',
         borderRadius: '0.5rem',
         cursor: 'pointer',
+        animation: 'pulse-glow-bronze 2s ease-in-out infinite',
         whiteSpace: 'pre-line',
         WebkitTapHighlightColor: 'transparent' as any,
         touchAction: 'manipulation' as any,
