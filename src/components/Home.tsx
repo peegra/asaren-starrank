@@ -164,15 +164,15 @@ const Home: React.FC = () => {
 
   const getClearButtonLabel = (status: MissionStatus) => {
     if (status.bronze && status.silver && status.gold) {
-      return 'スターを\nリセット';
-    }
-    if (status.silver && !status.gold) {
       return 'ゴールド\nクリア！';
     }
-    if (status.bronze && !status.silver) {
+    if (status.silver && !status.gold) {
       return 'シルバー\nクリア！';
     }
-    return 'ブロンズ\nクリア！';
+    if (status.bronze && !status.silver) {
+      return 'ブロンズ\nクリア！';
+    }
+    return 'まずは\nブロンズ';
   };
 
   const getClearButtonStyle = (status: MissionStatus, size: 'large' | 'compact' = 'large') => {
