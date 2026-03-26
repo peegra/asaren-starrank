@@ -2,17 +2,8 @@ import { useState } from 'react';
 import Home from './components/Home';
 import Mission from './components/Mission';
 import Ranking from './components/Ranking';
-import Maintenance from './components/Maintenance';
-
-// メンテナンスモード: true でメンテナンスページを表示、false で通常画面を表示
-const MAINTENANCE_MODE = true;
 
 function App() {
-  // メンテナンスモード中はメンテナンスページのみを表示
-  if (MAINTENANCE_MODE) {
-    return <Maintenance />;
-  }
-
   const [currentScreen, setCurrentScreen] = useState<'home' | 'mission' | 'ranking'>('home');
 
   const renderScreen = () => {
