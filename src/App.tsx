@@ -5,7 +5,7 @@ import Ranking from './components/Ranking';
 import Maintenance from './components/Maintenance';
 
 // メンテナンスモード: true でメンテナンスページを表示、false で通常画面を表示
-const MAINTENANCE_MODE = true;
+const MAINTENANCE_MODE = false;
 
 function App() {
   // メンテナンスモード中はメンテナンスページのみを表示
